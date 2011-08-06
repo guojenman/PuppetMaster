@@ -181,10 +181,6 @@ void WuCinderNITE::setup(string xmlpath, XnMapOutputMode mapMode, bool useDepthM
 	registerCallbacks();
 }
 
-void WuCinderNITE::_setup(string xmlpath, XnMapOutputMode mapMode, bool useDepthMap, bool useColorImage)
-{
-
-}
 
 void WuCinderNITE::startUpdating()
 {

@@ -50,6 +50,7 @@ void PuppetMaster::setup()
 
 	mCamEye = Vec3f(0, 0, -500.0f);
 	mCamLookAt = Vec3f::zero();
+
 }
 
 
@@ -68,7 +69,7 @@ void PuppetMaster::draw()
 void PuppetMaster::shutdown()
 {
 	console() << "quitting..." << std::endl;
-//	ni->shutdown();
+	//	ni->shutdown();
 }
 
 void PuppetMaster::keyUp(KeyEvent event)
