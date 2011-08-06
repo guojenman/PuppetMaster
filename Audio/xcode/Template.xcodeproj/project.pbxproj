@@ -19,6 +19,10 @@
 		5323E6B60EAFCA7E003A9687 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		53E3CDFC0E86099300238D2B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53E3CDFB0E86099300238D2B /* Carbon.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		D5E4BF0613EDB7C1008BD083 /* 1085.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D5E4BF0513EDB7C1008BD083 /* 1085.mp3 */; };
+		D5E4BF4B13EDBCB2008BD083 /* libfmodex.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D5E4BF4A13EDBCB2008BD083 /* libfmodex.dylib */; };
+		D5EC465213ED9F7200D6F091 /* AudioClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5EC465013ED9F7200D6F091 /* AudioClient.cpp */; };
+		D5EC465613EDA85600D6F091 /* FmodexPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5EC465413EDA85600D6F091 /* FmodexPlayer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +33,7 @@
 		00B784B10FF439BC000DE1D7 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		00B784B20FF439BC000DE1D7 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		00BAE6590E7ED9C10018A608 /* TemplateApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TemplateApp.cpp; path = ../src/TemplateApp.cpp; sourceTree = SOURCE_ROOT; };
+		00CCAF14116A9FEE008396D5 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = SOURCE_ROOT; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
@@ -38,8 +43,24 @@
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		53E3CDFB0E86099300238D2B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00CCAF14116A9FEE008396D5 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = SOURCE_ROOT; };
 		8D1107320486CEB800E47090 /* Template.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Template.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5E4BEEC13EDB4F1008BD083 /* Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
+		D5E4BF0513EDB7C1008BD083 /* 1085.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = 1085.mp3; path = ../resources/1085.mp3; sourceTree = "<group>"; };
+		D5E4BF3E13EDBC6D008BD083 /* fmod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod.h; sourceTree = "<group>"; };
+		D5E4BF3F13EDBC6D008BD083 /* fmod.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fmod.hpp; sourceTree = "<group>"; };
+		D5E4BF4013EDBC6D008BD083 /* fmod_codec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod_codec.h; sourceTree = "<group>"; };
+		D5E4BF4113EDBC6D008BD083 /* fmod_dsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod_dsp.h; sourceTree = "<group>"; };
+		D5E4BF4213EDBC6D008BD083 /* fmod_errors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod_errors.h; sourceTree = "<group>"; };
+		D5E4BF4313EDBC6D008BD083 /* fmod_memoryinfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod_memoryinfo.h; sourceTree = "<group>"; };
+		D5E4BF4413EDBC6D008BD083 /* fmod_output.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmod_output.h; sourceTree = "<group>"; };
+		D5E4BF4513EDBC6D008BD083 /* fmodlinux.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fmodlinux.h; sourceTree = "<group>"; };
+		D5E4BF4813EDBC6D008BD083 /* libfmodex.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libfmodex.dylib; sourceTree = "<group>"; };
+		D5E4BF4913EDBC6D008BD083 /* libfmodex.dylib~1ff4e510c44ce83eb6abef94a7b24181cb9280ba */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libfmodex.dylib~1ff4e510c44ce83eb6abef94a7b24181cb9280ba"; sourceTree = "<group>"; };
+		D5E4BF4A13EDBCB2008BD083 /* libfmodex.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfmodex.dylib; path = ../libs/lib/osx/libfmodex.dylib; sourceTree = "<group>"; };
+		D5E4BF4C13EDBECE008BD083 /* AudioClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioClient.h; sourceTree = "<group>"; };
+		D5EC465013ED9F7200D6F091 /* AudioClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioClient.cpp; sourceTree = "<group>"; };
+		D5EC465413EDA85600D6F091 /* FmodexPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FmodexPlayer.cpp; sourceTree = "<group>"; };
+		D5EC465513EDA85600D6F091 /* FmodexPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FmodexPlayer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D5E4BF4B13EDBCB2008BD083 /* libfmodex.dylib in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				0091D8F90E81B9330029341E /* OpenGL.framework in Frameworks */,
 				53E3CDFC0E86099300238D2B /* Carbon.framework in Frameworks */,
@@ -67,6 +89,10 @@
 			isa = PBXGroup;
 			children = (
 				00BAE6590E7ED9C10018A608 /* TemplateApp.cpp */,
+				D5EC465013ED9F7200D6F091 /* AudioClient.cpp */,
+				D5E4BF4C13EDBECE008BD083 /* AudioClient.h */,
+				D5EC465413EDA85600D6F091 /* FmodexPlayer.cpp */,
+				D5EC465513EDA85600D6F091 /* FmodexPlayer.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -109,7 +135,9 @@
 		29B97314FDCFA39411CA2CEA /* Template */ = {
 			isa = PBXGroup;
 			children = (
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				D5E4BF4A13EDBCB2008BD083 /* libfmodex.dylib */,
+				D5E4BF3C13EDBC6D008BD083 /* libs */,
+				29B97315FDCFA39411CA2CEA /* Headers */,
 				080E96DDFE201D6D7F000001 /* Source */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -118,19 +146,21 @@
 			name = Template;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				D5E4BEEC13EDB4F1008BD083 /* Resources.h */,
 				32CA4F630368D1EE00C91783 /* Template_Prefix.pch */,
 			);
-			name = "Headers";
+			name = Headers;
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D5E4BF0513EDB7C1008BD083 /* 1085.mp3 */,
 				8D1107310486CEB800E47090 /* Info.plist */,
-				00CCAF14116A9FEE008396D5 /* CinderApp.icns */,				
+				00CCAF14116A9FEE008396D5 /* CinderApp.icns */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -142,6 +172,48 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D5E4BF3C13EDBC6D008BD083 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				D5E4BF3D13EDBC6D008BD083 /* include */,
+				D5E4BF4613EDBC6D008BD083 /* lib */,
+			);
+			name = libs;
+			path = ../libs;
+			sourceTree = "<group>";
+		};
+		D5E4BF3D13EDBC6D008BD083 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				D5E4BF3E13EDBC6D008BD083 /* fmod.h */,
+				D5E4BF3F13EDBC6D008BD083 /* fmod.hpp */,
+				D5E4BF4013EDBC6D008BD083 /* fmod_codec.h */,
+				D5E4BF4113EDBC6D008BD083 /* fmod_dsp.h */,
+				D5E4BF4213EDBC6D008BD083 /* fmod_errors.h */,
+				D5E4BF4313EDBC6D008BD083 /* fmod_memoryinfo.h */,
+				D5E4BF4413EDBC6D008BD083 /* fmod_output.h */,
+				D5E4BF4513EDBC6D008BD083 /* fmodlinux.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		D5E4BF4613EDBC6D008BD083 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				D5E4BF4713EDBC6D008BD083 /* osx */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		D5E4BF4713EDBC6D008BD083 /* osx */ = {
+			isa = PBXGroup;
+			children = (
+				D5E4BF4813EDBC6D008BD083 /* libfmodex.dylib */,
+				D5E4BF4913EDBC6D008BD083 /* libfmodex.dylib~1ff4e510c44ce83eb6abef94a7b24181cb9280ba */,
+			);
+			path = osx;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,7 +244,11 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Template" */;
 			compatibilityVersion = "Xcode 3.0";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Template */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -188,6 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00CCAF15116A9FEE008396D5 /* CinderApp.icns in Resources */,
+				D5E4BF0613EDB7C1008BD083 /* 1085.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +276,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				00BAE65A0E7ED9C10018A608 /* TemplateApp.cpp in Sources */,
+				D5EC465213ED9F7200D6F091 /* AudioClient.cpp in Sources */,
+				D5EC465613EDA85600D6F091 /* FmodexPlayer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,17 +290,20 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;				
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Template_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../cinder_0.8.3_mac/blocks/FMOD-Ex-Cinder-Block/libs/lib/osx\"",
+					"\"$(SRCROOT)/../libs/lib/osx\"",
 				);
+				OTHER_LDFLAGS = "\"$(CINDER_PATH)/lib/libcinder_d.a\"";
 				PRODUCT_NAME = Template;
 				WRAPPER_EXTENSION = app;
 			};
@@ -235,16 +317,19 @@
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Template_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder.a\"",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../cinder_0.8.3_mac/blocks/FMOD-Ex-Cinder-Block/libs/lib/osx\"",
+					"\"$(SRCROOT)/../libs/lib/osx\"",
 				);
+				OTHER_LDFLAGS = "\"$(CINDER_PATH)/lib/libcinder.a\"";
 				PRODUCT_NAME = Template;
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
@@ -256,13 +341,16 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = i386;
-				CINDER_PATH = "../../cinder_0.8.3_mac";
+				CINDER_PATH = ../../../cinder_0.8.3_mac;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/boost\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(CINDER_PATH)/boost\"",
+					/usr/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include";
 			};
 			name = Debug;
@@ -272,13 +360,16 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = i386;
-				CINDER_PATH = "../../cinder_0.8.3_mac";
+				CINDER_PATH = ../../../cinder_0.8.3_mac;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/boost\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(CINDER_PATH)/boost\"",
+					/usr/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include";
 			};
 			name = Release;
