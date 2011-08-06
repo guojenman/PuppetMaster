@@ -11,12 +11,15 @@
 #include "cinder/Quaternion.h"
 #include "cinder/MayaCamUI.h"
 
+#include "GLDebugDrawer.h"
 #include "WuCinderNITE.h"
 #include <btBulletDynamicsCommon.h>
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
+#define DEBUG_DRAW_BULLET 1
 
 class PuppetMaster : public AppBasic {
 public:
@@ -46,11 +49,9 @@ public:
 
 	CameraPersp mCam;
 	RagDollController *_ragdollController;
+	GLDebugDrawer _bulletDebugDraw;
 
 
-	Vec3f mCamEye;
-	Vec3f mCamLookAt;
-	Vec4f lightPosition;
 };
 
 void PuppetMaster::prepareSettings( AppBasic::Settings *settings )
@@ -67,14 +68,16 @@ void PuppetMaster::setup()
 
 	_ragdollController = new RagDollController();
 	_ragdollController->initPhysics();
+#if DEBUG_DRAW_BULLET
+	_bulletDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	_ragdollController->m_dynamicsWorld->setDebugDrawer(&_bulletDebugDraw);
+#endif
 	_stepPhysics = false;
 
 //	ni = WuCinderNITE::getInstance();
 //	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
 //	ni->startUpdating();
 
-	mCamEye = Vec3f(0, 2, -5.0f);
-	mCamLookAt = Vec3f::zero();
 }
 
 void PuppetMaster::setupCamera()
@@ -88,7 +91,7 @@ void PuppetMaster::setupCamera()
 	ci::CameraPersp cam = ci::CameraPersp( getWindowWidth(), getWindowHeight(), cameraFOV );
 
 	cam.setWorldUp( ci::Vec3f(0, 1, 0) );
-	cam.setEyePoint( ci::Vec3f(0, 0, 0 ) );
+	cam.setEyePoint( ci::Vec3f(0, 0, -5.0f ) );
 	cam.setCenterOfInterestPoint( ci::Vec3f::zero() );
 	cam.setPerspective( cameraFOV, getWindowAspectRatio(), cameraNear, cameraFar );
 	cam.setViewDirection( ci::Vec3f(0, 0, 1 ) );
@@ -103,9 +106,6 @@ void PuppetMaster::update()
 	if(_stepPhysics) {
 		_ragdollController->clientMoveAndDisplay( 16.0 );
 	}
-
-	mCam.setPerspective(60.0f, getWindowAspectRatio(), 1.0f, 1000.0f);
-	mCam.lookAt(mCamEye, mCamLookAt);
 }
 
 void PuppetMaster::draw()
@@ -114,6 +114,12 @@ void PuppetMaster::draw()
 	gl::pushMatrices();
 	gl::setMatrices( _mayaCam.getCamera() );
 
+
+#if DEBUG_DRAW_BULLET
+	_ragdollController->m_dynamicsWorld->debugDrawWorld();
+	gl::popMatrices();
+	return;
+#endif
 	// Draw each rigid body in the doll
 	for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
 	{
@@ -141,7 +147,7 @@ void PuppetMaster::draw()
 			ci::gl::drawCube( ci::Vec3f::zero(), ci::Vec3f(shape->getRadius(), shape->getHalfHeight(), shape->getRadius()) * 2 );
 		ci::gl::popModelView();
 	}
-		gl::popMatrices();
+	gl::popMatrices();
 }
 
 void PuppetMaster::shutdown()

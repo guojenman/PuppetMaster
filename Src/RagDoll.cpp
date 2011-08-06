@@ -44,18 +44,22 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.), btScalar(1.), btScalar(0.)));
 		m_bodies[BODYPART_PELVIS] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_PELVIS]);
+		m_constraints[BODYPART_PELVIS] = createPoint2PointConstraint(m_bodies[BODYPART_PELVIS]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.), btScalar(1.2), btScalar(0.)));
 		m_bodies[BODYPART_SPINE] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_SPINE]);
+		m_constraints[BODYPART_SPINE] = createPoint2PointConstraint(m_bodies[BODYPART_SPINE]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.), btScalar(1.6), btScalar(0.)));
 		m_bodies[BODYPART_HEAD] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_HEAD]);
+		m_constraints[BODYPART_HEAD] = createPoint2PointConstraint(m_bodies[BODYPART_HEAD]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(-0.18), btScalar(0.65), btScalar(0.)));
 		m_bodies[BODYPART_LEFT_UPPER_LEG] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_UPPER_LEG]);
+		m_constraints[BODYPART_LEFT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_UPPER_LEG]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(-0.18), btScalar(0.2), btScalar(0.)));
@@ -64,30 +68,36 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.18), btScalar(0.65), btScalar(0.)));
 		m_bodies[BODYPART_RIGHT_UPPER_LEG] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_UPPER_LEG]);
+		m_constraints[BODYPART_RIGHT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_UPPER_LEG]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.18), btScalar(0.2), btScalar(0.)));
 		m_bodies[BODYPART_RIGHT_LOWER_LEG] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_LOWER_LEG]);
+		m_constraints[BODYPART_RIGHT_LOWER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_LOWER_LEG]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(-0.35), btScalar(1.45), btScalar(0.)));
 		transform.getBasis().setEulerZYX(0,0,M_PI_2);
 		m_bodies[BODYPART_LEFT_UPPER_ARM] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_UPPER_ARM]);
+		m_constraints[BODYPART_LEFT_UPPER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(-0.7), btScalar(1.45), btScalar(0.)));
 		transform.getBasis().setEulerZYX(0,0,M_PI_2);
 		m_bodies[BODYPART_LEFT_LOWER_ARM] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_LOWER_ARM]);
+		m_constraints[BODYPART_LEFT_LOWER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_LOWER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.35), btScalar(1.45), btScalar(0.)));
 		transform.getBasis().setEulerZYX(0,0,-M_PI_2);
 		m_bodies[BODYPART_RIGHT_UPPER_ARM] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_UPPER_ARM]);
+		m_constraints[BODYPART_RIGHT_UPPER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(btVector3(btScalar(0.7), btScalar(1.45), btScalar(0.)));
 		transform.getBasis().setEulerZYX(0,0,-M_PI_2);
 		m_bodies[BODYPART_RIGHT_LOWER_ARM] = localCreateRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_LOWER_ARM]);
+		m_constraints[BODYPART_RIGHT_LOWER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_LOWER_ARM]);
 
 		// Setup some damping on the m_bodies
 		for (int i = 0; i < BODYPART_COUNT; ++i)
@@ -228,6 +238,17 @@ btRigidBody* RagDoll::localCreateRigidBody (btScalar mass, const btTransform& st
 	m_ownerWorld->addRigidBody(body);
 
 	return body;
+}
+
+btPoint2PointConstraint* RagDoll::createPoint2PointConstraint(btRigidBody* body)
+{
+	body->setActivationState(DISABLE_DEACTIVATION);
+	btVector3 pivot = body->getCenterOfMassTransform().getOrigin();
+	btPoint2PointConstraint* constraint = new btPoint2PointConstraint(*body, pivot);
+	constraint->m_setting.m_impulseClamp = 30.0f; // clapping
+	constraint->m_setting.m_tau = 0.001f;
+	m_ownerWorld->addConstraint(constraint);
+	return constraint;
 }
 
 RagDoll::~RagDoll() {

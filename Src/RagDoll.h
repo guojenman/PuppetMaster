@@ -9,7 +9,7 @@
 #define RagDoll_H_
 
 #include "LinearMath/btAlignedObjectArray.h"
-#include "BulletDynamics/Dynamics/btDynamicsWorld.h"
+#include "btBulletDynamicsCommon.h"
 #include "RagDoll.h"
 #include "cinder/Vector.h"
 
@@ -72,11 +72,14 @@ public:
 	btDynamicsWorld* m_ownerWorld;
 	btCollisionShape* m_shapes[BODYPART_COUNT];
 	btRigidBody* m_bodies[BODYPART_COUNT];
+	btPoint2PointConstraint* m_constraints[JOINT_COUNT];
 	ci::Vec3f* m_sizes[BODYPART_COUNT];
 	btTypedConstraint* m_joints[JOINT_COUNT];
 
+
 private:
 	btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape);
+	btPoint2PointConstraint* createPoint2PointConstraint(btRigidBody* body);
 };
 
 #endif /* RagDoll_H_ */
