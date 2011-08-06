@@ -6,9 +6,11 @@
 #include "cinder/Vector.h"
 #include "cinder/Rand.h"
 #include "cinder/Camera.h"
+#include "RagDollController.h"
 
 #include "WuCinderNITE.h"
 #include <btBulletDynamicsCommon.h>
+
 
 using namespace ci;
 using namespace ci::app;
@@ -27,6 +29,7 @@ public:
 	WuCinderNITE* ni;
 
 	CameraPersp mCam;
+	RagDollController *_ragdollController;
 	Vec3f mCamEye;
 	Vec3f mCamLookAt;
 	Vec4f lightPosition;
