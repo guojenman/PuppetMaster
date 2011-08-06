@@ -62,14 +62,26 @@ void PuppetMaster::setup()
 
 void PuppetMaster::update()
 {
+	_ragdollController->clientMoveAndDisplay( 16.0 );
 	mCam.setPerspective(60.0f, getWindowAspectRatio(), 1.0f, 1000.0f);
 	mCam.lookAt(mCamEye, mCamLookAt);
-
 }
 
 void PuppetMaster::draw()
 {
-	gl::clear(ColorA(0, 0, 0, 0), true);
+//	RagDoll* thedoll = _ragdollController->m_ragdolls;
+
+	// Setup some damping on the m_bodies
+	// TODO: HARD CODED BODYPART_COUNT
+//			for (int i = 0; i < 11; ++i)
+//			{
+//				btRigidBody* body = _ragdollController->m_ragdolls->m_bodies[i];
+//				m_bodies[i]->setDamping(0.05, 0.85);
+//				m_bodies[i]->setDeactivationTime(0.8);
+//				m_bodies[i]->setSleepingThresholds(1.6, 2.5);
+//			}
+
+//	gl::clear(ColorA(0, 0, 0, 0), true);
 }
 
 void PuppetMaster::shutdown()

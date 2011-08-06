@@ -1,5 +1,6 @@
 #include "LinearMath/btAlignedObjectArray.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
+#include "RagDollA.h"
 class btBroadphaseInterface;
 class btCollisionShape;
 class btOverlappingPairCache;
@@ -10,10 +11,14 @@ class btDefaultCollisionConfiguration;
 
 
 class RagDollController
-{	///this is the most important class
+{
+public:
+
+
+	///this is the most important class
 	btDynamicsWorld*		m_dynamicsWorld;
 
-	btAlignedObjectArray<class RagDoll*> m_ragdolls;
+	RagDollA* ragDoll;
 
 	//keep the collision shapes, for deletion/cleanup
 	btAlignedObjectArray<btCollisionShape*>	m_collisionShapes;
@@ -26,7 +31,6 @@ class RagDollController
 
 	btDefaultCollisionConfiguration* m_collisionConfiguration;
 
-public:
 	void initPhysics();
 
 	void exitPhysics();
@@ -38,19 +42,10 @@ public:
 
 	void spawnRagdoll(const btVector3& startOffset);
 
-	virtual void clientMoveAndDisplay();
+	virtual void clientMoveAndDisplay( double delta );
 
 	virtual void displayCallback();
 
 	virtual void keyboardCallback(unsigned char key, int x, int y);
-
-//	static DemoApplication* Create()
-//	{
-//		RagDollController* demo = new RagDollController();
-//		demo->myinit();
-//		demo->initPhysics();
-//		return demo;
-//	}
-
 };
 
