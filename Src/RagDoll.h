@@ -1,16 +1,16 @@
 /*
- * RagDollA.h
+ * RagDoll.h
  *
  *  Created on: Aug 6, 2011
  *      Author: mariogonzalez
  */
 
-#ifndef RAGDOLLA_H_
-#define RAGDOLLA_H_
+#ifndef RagDoll_H_
+#define RagDoll_H_
 
 #include "LinearMath/btAlignedObjectArray.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
-#include "RagDollA.h"
+#include "RagDoll.h"
 class btBroadphaseInterface;
 class btCollisionShape;
 class btOverlappingPairCache;
@@ -19,7 +19,7 @@ class btConstraintSolver;
 struct btCollisionAlgorithmCreateFunc;
 class btDefaultCollisionConfiguration;
 
-class RagDollA {
+class RagDoll {
 public:
 	enum
 		{
@@ -63,9 +63,9 @@ public:
 		};
 
 
-	RagDollA();
-	RagDollA(btDynamicsWorld* ownerWorld, const btVector3& positionOffset);
-	virtual ~RagDollA();
+	RagDoll();
+	RagDoll(btDynamicsWorld* ownerWorld, const btVector3& positionOffset);
+	virtual ~RagDoll();
 
 	btDynamicsWorld* m_ownerWorld;
 	btCollisionShape* m_shapes[BODYPART_COUNT];
@@ -76,4 +76,4 @@ private:
 	btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape);
 };
 
-#endif /* RAGDOLLA_H_ */
+#endif /* RagDoll_H_ */

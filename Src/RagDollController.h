@@ -1,6 +1,6 @@
 #include "LinearMath/btAlignedObjectArray.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
-#include "RagDollA.h"
+#include "RagDoll.h"
 class btBroadphaseInterface;
 class btCollisionShape;
 class btOverlappingPairCache;
@@ -18,7 +18,7 @@ public:
 	///this is the most important class
 	btDynamicsWorld*		m_dynamicsWorld;
 
-	RagDollA* ragDoll;
+	RagDoll* ragDoll;
 
 	//keep the collision shapes, for deletion/cleanup
 	btAlignedObjectArray<btCollisionShape*>	m_collisionShapes;

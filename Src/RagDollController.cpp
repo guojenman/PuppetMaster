@@ -83,7 +83,7 @@ void RagDollController::initPhysics()
 
 void RagDollController::spawnRagdoll(const btVector3& startOffset)
 {
-	ragDoll = new RagDollA(m_dynamicsWorld, startOffset);
+	ragDoll = new RagDoll(m_dynamicsWorld, startOffset);
 }
 
 void RagDollController::clientMoveAndDisplay( double delta )

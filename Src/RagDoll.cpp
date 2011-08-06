@@ -1,11 +1,11 @@
 /*
- * RagDollA.cpp
+ * RagDoll.cpp
  *
  *  Created on: Aug 6, 2011
  *      Author: mariogonzalez
  */
 
-#include "RagDollA.h"
+#include "RagDoll.h"
 #define CONSTRAINT_DEBUG_SIZE 0.2f
 
 #include "RagDollController.h"
@@ -15,12 +15,12 @@
 
 #include "LinearMath/btIDebugDraw.h"
 
-RagDollA::RagDollA() {
+RagDoll::RagDoll() {
 	// TODO Auto-generated constructor stub
 
 }
 
-RagDollA::RagDollA (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
+RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 		: m_ownerWorld (ownerWorld)
 	{
 		// Setup the geometry
@@ -212,7 +212,7 @@ RagDollA::RagDollA (btDynamicsWorld* ownerWorld, const btVector3& positionOffset
 		m_ownerWorld->addConstraint(m_joints[JOINT_RIGHT_ELBOW], true);
 	}
 
-btRigidBody* RagDollA::localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape)
+btRigidBody* RagDoll::localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape)
 {
 	bool isDynamic = (mass != 0.f);
 
@@ -230,7 +230,7 @@ btRigidBody* RagDollA::localCreateRigidBody (btScalar mass, const btTransform& s
 	return body;
 }
 
-RagDollA::~RagDollA() {
+RagDoll::~RagDoll() {
 	int i;
 
 	// Remove all constraints
