@@ -47,6 +47,9 @@ void PuppetMaster::setup()
 	mapMode.nXRes = 640;
 	mapMode.nYRes = 480;
 
+	_ragdollController = new RagDollController();
+	_ragdollController->initPhysics();
+
 //	ni = WuCinderNITE::getInstance();
 //	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
 //	ni->startUpdating();
