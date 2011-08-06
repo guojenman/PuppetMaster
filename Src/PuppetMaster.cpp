@@ -7,10 +7,12 @@
 #include "cinder/Rand.h"
 #include "cinder/Camera.h"
 #include "RagDollController.h"
+#include "RagDoll.h"
+#include "cinder/Quaternion.h"
+#include "cinder/MayaCamUI.h"
 
 #include "WuCinderNITE.h"
 #include <btBulletDynamicsCommon.h>
-
 
 using namespace ci;
 using namespace ci::app;
@@ -20,6 +22,13 @@ class PuppetMaster : public AppBasic {
 public:
 	void prepareSettings( AppBasic::Settings *settings );
 	void setup();
+	void setupCamera();
+
+	void		mouseDown( ci::app::MouseEvent event );
+	void		mouseMove( ci::app::MouseEvent event );
+	void		mouseDrag( ci::app::MouseEvent event );
+	void		mouseUp( ci::app::MouseEvent event );
+
 	void update();
 	void draw();
 	void shutdown();
@@ -27,9 +36,15 @@ public:
 	void keyUp(KeyEvent event);
 
 	WuCinderNITE* ni;
+	ci::MayaCamUI		_mayaCam;
+	Vec2f				_mousePosition;
+	bool 				_mouseIsDown;
+
 
 	CameraPersp mCam;
 	RagDollController *_ragdollController;
+
+
 	Vec3f mCamEye;
 	Vec3f mCamLookAt;
 	Vec4f lightPosition;
@@ -54,9 +69,28 @@ void PuppetMaster::setup()
 //	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
 //	ni->startUpdating();
 
-	mCamEye = Vec3f(0, 0, -500.0f);
+	mCamEye = Vec3f(0, 2, -5.0f);
 	mCamLookAt = Vec3f::zero();
+}
 
+void PuppetMaster::setupCamera()
+{
+	// Camera perspective properties
+	float cameraFOV			= 60.0f;
+	float cameraNear		= 1.0f;
+	float cameraFar			= 1000000.0;
+
+	ci::Vec3f p = ci::Vec3f::one() * 2000.0f;// Start off this far away from the center
+	ci::CameraPersp cam = ci::CameraPersp( getWindowWidth(), getWindowHeight(), cameraFOV );
+
+	cam.setWorldUp( ci::Vec3f(0, 1, 0) );
+	cam.setEyePoint( ci::Vec3f(0, 0, 0 ) );
+	cam.setCenterOfInterestPoint( ci::Vec3f::zero() );
+	cam.setPerspective( cameraFOV, getWindowAspectRatio(), cameraNear, cameraFar );
+	cam.setViewDirection( ci::Vec3f(0, 0, 1 ) );
+
+	// Set mayacamera
+	_mayaCam.setCurrentCam( cam );
 }
 
 
@@ -69,25 +103,63 @@ void PuppetMaster::update()
 
 void PuppetMaster::draw()
 {
-//	RagDoll* thedoll = _ragdollController->m_ragdolls;
+	gl::clear(ColorA(0, 0, 0, 0), true);
+	gl::pushMatrices();
+	gl::setMatrices( _mayaCam.getCamera() );
+
+	RagDoll* thedoll = _ragdollController->ragDoll;
 
 	// Setup some damping on the m_bodies
 	// TODO: HARD CODED BODYPART_COUNT
-//			for (int i = 0; i < 11; ++i)
-//			{
-//				btRigidBody* body = _ragdollController->m_ragdolls->m_bodies[i];
-//				m_bodies[i]->setDamping(0.05, 0.85);
-//				m_bodies[i]->setDeactivationTime(0.8);
-//				m_bodies[i]->setSleepingThresholds(1.6, 2.5);
-//			}
+		for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
+		{
+			btRigidBody* body = _ragdollController->ragDoll->m_bodies[i];
 
-//	gl::clear(ColorA(0, 0, 0, 0), true);
+			btTransform trans;
+			body->getMotionState()->getWorldTransform( trans );
+
+			float mSize = 0.1;
+			ci::Vec3f pos = ci::Vec3f( trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ() );
+			btQuaternion btQuat = trans.getRotation();
+			ci::Quatf rotation = ci::Quatf( btQuat.getX(), btQuat.getY(), btQuat.getZ(), btQuat.getW() );
+
+			ci::gl::pushModelView();
+				ci::gl::translate( pos );
+				ci::gl::rotate( rotation );
+				ci::gl::drawCube( ci::Vec3f::zero(), ci::Vec3f(mSize, mSize, mSize) * 2 );
+			ci::gl::popMatrices();
+		}
+		gl::popMatrices();
 }
 
 void PuppetMaster::shutdown()
 {
 	console() << "quitting..." << std::endl;
 	//	ni->shutdown();
+}
+
+void PuppetMaster::mouseDown( ci::app::MouseEvent event )
+{
+	_mouseIsDown = true;
+	_mayaCam.mouseDown( event.getPos() );
+}
+
+void PuppetMaster::mouseDrag( ci::app::MouseEvent event )
+{
+	_mayaCam.mouseDrag( event.getPos(), event.isLeftDown(), event.isMetaDown(), event.isRightDown() );
+	_mousePosition = event.getPos();
+}
+
+void PuppetMaster::mouseMove( ci::app::MouseEvent event )
+{
+	_mayaCam.mouseDrag( event.getPos(), event.isLeftDown(), event.isMetaDown(), event.isRightDown() );
+	_mousePosition = event.getPos();
+}
+
+void PuppetMaster::mouseUp( ci::app::MouseEvent event )
+{
+	_mouseIsDown = false;
+	_mayaCam.mouseDown( event.getPos() );
 }
 
 void PuppetMaster::keyUp(KeyEvent event)

@@ -96,7 +96,7 @@ void RagDollController::clientMoveAndDisplay( double delta )
 		ms = minFPS;
 
 	if (m_dynamicsWorld) {
-		m_dynamicsWorld->stepSimulation(ms / 1000000.f);
+		m_dynamicsWorld->stepSimulation(1000.0f / 60.0f);
 
 		//optional but useful: debug drawing
 		m_dynamicsWorld->debugDrawWorld();
