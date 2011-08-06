@@ -33,12 +33,15 @@ public:
 	void draw();
 	void shutdown();
 
+	void keyDown(KeyEvent event);
 	void keyUp(KeyEvent event);
 
 	WuCinderNITE* ni;
 	ci::MayaCamUI		_mayaCam;
 	Vec2f				_mousePosition;
 	bool 				_mouseIsDown;
+
+	bool				_stepPhysics;
 
 
 	CameraPersp mCam;
@@ -64,6 +67,7 @@ void PuppetMaster::setup()
 
 	_ragdollController = new RagDollController();
 	_ragdollController->initPhysics();
+	_stepPhysics = false;
 
 //	ni = WuCinderNITE::getInstance();
 //	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
@@ -96,7 +100,10 @@ void PuppetMaster::setupCamera()
 
 void PuppetMaster::update()
 {
-	_ragdollController->clientMoveAndDisplay( 16.0 );
+	if(_stepPhysics) {
+		_ragdollController->clientMoveAndDisplay( 16.0 );
+	}
+
 	mCam.setPerspective(60.0f, getWindowAspectRatio(), 1.0f, 1000.0f);
 	mCam.lookAt(mCamEye, mCamLookAt);
 }
@@ -107,28 +114,33 @@ void PuppetMaster::draw()
 	gl::pushMatrices();
 	gl::setMatrices( _mayaCam.getCamera() );
 
-	RagDoll* thedoll = _ragdollController->ragDoll;
+	// Draw each rigid body in the doll
+	for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
+	{
+		btRigidBody* body = _ragdollController->ragDoll->m_bodies[i];
 
-	// Setup some damping on the m_bodies
-	// TODO: HARD CODED BODYPART_COUNT
-		for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
-		{
-			btRigidBody* body = _ragdollController->ragDoll->m_bodies[i];
+		btTransform trans;
+		body->getMotionState()->getWorldTransform( trans );
 
-			btTransform trans;
-			body->getMotionState()->getWorldTransform( trans );
+		float mSize = 0.1;
+		ci::Vec3f pos = ci::Vec3f( trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ() );
+		ci::Quatf rotation = ci::Quatf( trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ(), trans.getRotation().getW() );
 
-			float mSize = 0.1;
-			ci::Vec3f pos = ci::Vec3f( trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ() );
-			btQuaternion btQuat = trans.getRotation();
-			ci::Quatf rotation = ci::Quatf( btQuat.getX(), btQuat.getY(), btQuat.getZ(), btQuat.getW() );
+		btCapsuleShape* shape = dynamic_cast<btCapsuleShape*> (_ragdollController->ragDoll->m_shapes[i]);
 
-			ci::gl::pushModelView();
-				ci::gl::translate( pos );
-				ci::gl::rotate( rotation );
-				ci::gl::drawCube( ci::Vec3f::zero(), ci::Vec3f(mSize, mSize, mSize) * 2 );
-			ci::gl::popMatrices();
-		}
+		//new btCapsuleShape(btScalar(0.15), btScalar(0.20));
+//		new btCapsuleShape(btScalar(0.15), btScalar(0.20));
+
+		float r = shape->getRadius();
+		float h = shape->getHalfHeight();
+
+		//ci::Vec3f* m_sizes[BODYPART_COUNT]
+		ci::gl::pushModelView();
+			ci::gl::translate( pos );
+			ci::gl::rotate( rotation );
+			ci::gl::drawCube( ci::Vec3f::zero(), ci::Vec3f(shape->getRadius(), shape->getHalfHeight(), shape->getRadius()) * 2 );
+		ci::gl::popModelView();
+	}
 		gl::popMatrices();
 }
 
@@ -162,10 +174,20 @@ void PuppetMaster::mouseUp( ci::app::MouseEvent event )
 	_mayaCam.mouseDown( event.getPos() );
 }
 
+void PuppetMaster::keyDown(KeyEvent event)
+{
+	if (event.getChar() == KeyEvent::KEY_s) {
+		_stepPhysics = true;
+	}
+}
+
 void PuppetMaster::keyUp(KeyEvent event)
 {
 	if (event.getChar() == KeyEvent::KEY_q) {
 		quit();
+	}
+	if (event.getChar() == KeyEvent::KEY_s) {
+		_stepPhysics = false;
 	}
 }
 

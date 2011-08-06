@@ -11,6 +11,8 @@
 #include "LinearMath/btAlignedObjectArray.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
 #include "RagDoll.h"
+#include "cinder/Vector.h"
+
 class btBroadphaseInterface;
 class btCollisionShape;
 class btOverlappingPairCache;
@@ -70,6 +72,7 @@ public:
 	btDynamicsWorld* m_ownerWorld;
 	btCollisionShape* m_shapes[BODYPART_COUNT];
 	btRigidBody* m_bodies[BODYPART_COUNT];
+	ci::Vec3f* m_sizes[BODYPART_COUNT];
 	btTypedConstraint* m_joints[JOINT_COUNT];
 
 private:
