@@ -41,7 +41,7 @@ Particle::Particle( Vec3f _loc, Vec3f _vel )
 	// This randomizes the original sent velocity so the particles
 	// dont all move at the same speed in the same direction.
 	vel = _vel * 0.5f + Rand::randVec3f() * Rand::randFloat( 10.0f );
-	vel *= 0.1;
+	vel *= 0.2;
 
 	perlin = Vec3f::zero();
 
@@ -67,7 +67,7 @@ void Particle::exist()
 void Particle::findPerlin()
 {
 	Vec3f noise = sPerlin.dfBm( loc[0] * 0.01f + Vec3f( 0, 0, counter / 100.0f ) );
-	perlin = noise.normalized() * 0.5f;
+	perlin = noise.normalized() * 0.75f;
 }
 
 void Particle::findVelocity()

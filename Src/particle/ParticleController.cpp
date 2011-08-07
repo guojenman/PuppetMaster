@@ -85,9 +85,10 @@ void ParticleController::update( RagDoll* aRagDoll )
 		btTransform trans;
 		aRagDoll->m_bodies[ (*it)->jointID ]->getMotionState()->getWorldTransform(trans);
 		(*it)->exist( ci::Vec2i( trans.getOrigin().getX()*1000, trans.getOrigin().getY()*1000 ) );
-//		(*it)->exist( ci::Vec2i( ci::Rand::randFloat(1000), -200 ) );
-//		(*it)->addParticles( 2 );
 	}
+
+	gl::color( 1.0, 1.0, 1.0, 1.0 );
+//	gl::color( 1.0, 1.0, 1.0, 1.0 );
 }
 
 
@@ -134,8 +135,7 @@ void ParticleController::draw()
 void renderImage( Vec3f _loc, float _diam, Color _col, float _alpha )
 {
 	_loc *= 0.001f;
-//	_loc.y += 2;
-	_diam *= 0.01;
+	_diam *= 0.02;
 	glPushMatrix();
 	glTranslatef( _loc.x, _loc.y, _loc.z );
 	glScalef( _diam, _diam, _diam );

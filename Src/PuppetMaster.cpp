@@ -214,7 +214,7 @@ void PuppetMaster::updateAudioNodes() {
 		float y = trans.getOrigin().getY();
 		if( y < scanlinePosition && y > lastScanlinePosition ) {
 			Emitter* emitter = _particleController->getEmitterWithJointID( _audioNodes[i]->jointID );
-			if(emitter) emitter->addParticles( 10 );
+			if(emitter) emitter->addParticles( 100 );
 			_audioNodes[i]->reset();
 		}
 
