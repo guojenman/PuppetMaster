@@ -1,6 +1,7 @@
 
 #include "ArduinoCommandInterface.h"
 
+
 void ArduinoCommandInterface::setup(string device, bool debug = false)
 {
 	isDebug = debug;
@@ -39,12 +40,13 @@ void ArduinoCommandInterface::sendMessage(string message)
 	serial.writeByte(m_Test[0]);
 	serial.writeByte(m_Test[0]);
     
-	if(isDebug) console() << serialCommand;
+//	if(isDebug) console() << serialCommand;
 }
 
 void ArduinoCommandInterface::setCommand(string c)
 {
     serialCommand = c;
+
 }
 
 void ArduinoCommandInterface::resetCommand()

@@ -37,6 +37,7 @@
 #include "BulletDynamics/ConstraintSolver/btHingeConstraint.h"
 #include "audio/AudioNode.h"
 #include "particle/ParticleController.h"
+#include "serial/ArduinoCommandInterface.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -49,6 +50,9 @@ static const int SHADOW_MAP_RESOLUTION = 1024;
 #define DEBUG_DRAW_BULLET 0
 #define APP_WIDTH 800
 #define APP_HEIGHT 600
+
+
+
 extern int counter;
 
 
@@ -60,6 +64,7 @@ public:
 	void setupCamera();
 	void setupAudioNodes();
 	void setupParticleController();
+	void setupSerialCommunication();
 	void initShadowMap();
 	void updateShadowMap();
 	void render();
@@ -68,7 +73,7 @@ public:
 	void		mouseMove( ci::app::MouseEvent event );
 	void		mouseDrag( ci::app::MouseEvent event );
 	void		mouseUp( ci::app::MouseEvent event );
-	void 		transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset);
+	void 		transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float xOffset, float yOffset, float zOffset);
 	void		dropBulletJointToFloor(int bulletJoint);
 	void		pickupBulletJointFromFloor(int bulletJoint);
 	void		drawFloorPlane( float floorSize );
@@ -76,6 +81,7 @@ public:
 	void update();
 	void updateAudioNodes();
 	void updateParticleController();
+	void updateSerialCommunication();
 	void draw();
 	void shutdown();
 
@@ -102,6 +108,8 @@ public:
 	// ParticleController
 	ParticleController* _particleController;
 
+	// SerialCommunication
+	ArduinoCommandInterface* _puppet;
 
 	//ciDeferred
 	DisplayList			mDisplayList;
@@ -126,7 +134,8 @@ void PuppetMaster::setup()
 	mapMode.nXRes = 640;
 	mapMode.nYRes = 480;
 	ni = WuCinderNITE::getInstance();
-	ni->setup("Resources/SkeletonRec.oni");
+	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
+//	ni->setup("Resources/SkeletonRec.oni");
 	ni->startUpdating();
 
 	_ragdollController = new RagDollController();
@@ -198,6 +207,7 @@ void PuppetMaster::setup()
 
 	setupAudioNodes();
 	setupParticleController();
+	setupSerialCommunication();
 }
 
 
@@ -213,13 +223,13 @@ void PuppetMaster::setupAudioNodes() {
 
 	scanlinePosition = 0;
 	lastScanlinePosition = 0;
-	scanLineSpeed = 0.025;
+	scanLineSpeed = 0.035;
 
 	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_LEFT_LOWER_ARM,	base_path + "piano_B.mp3"));
-	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_RIGHT_LOWER_ARM, base_path + "piano_D.mp3"));
+	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_RIGHT_UPPER_ARM, base_path + "piano_D.mp3"));
 
 	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_LEFT_LOWER_LEG, base_path + "piano_F_sharp.mp3"));
-	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_RIGHT_LOWER_LEG, base_path + "piano_middle_C.mp3"));
+	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_RIGHT_UPPER_LEG, base_path + "piano_middle_C.mp3"));
 	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_HEAD, base_path + "piano_G_sharp.mp3"));
 }
 
@@ -233,25 +243,31 @@ void PuppetMaster::setupParticleController() {
 	}
 }
 
+void PuppetMaster::setupSerialCommunication() {
+	_puppet = new ArduinoCommandInterface();
+	_puppet->setup("tty.usbserial-A700dYVr", true); //windows use: "COM6"
+}
+
 
 void PuppetMaster::update()
 {
 	setupCamera();
 	_ragdollController->clientMoveAndDisplay( 16.0 );
 	updateAudioNodes();
+	updateSerialCommunication();
 }
 
 
 void PuppetMaster::updateAudioNodes() {
 
-#if DEBUG_USE_NITE
-	if (!ni->mUserGen.GetSkeletonCap().IsTracking(1))
-		return;
-#endif
 
 	scanlinePosition += scanLineSpeed;
 	if(scanlinePosition > 4)
 		scanlinePosition = 0;
+
+	if (!ni->mUserGen.GetSkeletonCap().IsTracking(1))
+		return;
+
 
 	// Play tone if between last and current scanline position
 	size_t len = _audioNodes.size();
@@ -279,6 +295,97 @@ void PuppetMaster::updateAudioNodes() {
 
 void PuppetMaster::updateParticleController() {
 //	_particleController->update( _ragdollController->ragDoll );
+}
+
+
+void PuppetMaster::updateSerialCommunication() {
+	//_serialCommunication
+	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
+
+		// LEFT SIDE
+		XnSkeletonJointPosition leftHand;
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_HAND, leftHand);
+
+		XnSkeletonJointPosition leftElbow;
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_ELBOW, leftElbow);
+
+		XnSkeletonJointPosition leftShoulder;
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_SHOULDER, leftShoulder);
+
+		float deltaY = leftHand.position.Y - leftElbow.position.Y;
+		float range = 100.0;
+		if(deltaY > range) {
+//			std::cout << "LEFT_ARM_UP" << std::endl;
+			_puppet->setCommand( LEFT_ARM_UP );
+			_puppet->update();
+		} else if ( deltaY < -range) {
+//			std::cout << "LEFT_ARM_DOWN" << std::endl;
+			_puppet->setCommand( LEFT_ARM_DOWN );
+			_puppet->update();
+		} else {
+//			std::cout << "LEFT_ARM_REST" << std::endl;
+//			_puppet->setCommand( LEFT_ARM_CLEAR );
+		}
+
+		deltaY = leftElbow.position.Y - leftShoulder.position.Y;
+		if(deltaY > range) {
+//			std::cout << "LEFT_LEG_UP" << std::endl;
+			_puppet->setCommand( LEFT_LEG_UP );
+			_puppet->update();
+		} else if ( deltaY < -range ) {
+//			std::cout << "LEFT_LEG_DOWN" << std::endl;
+			_puppet->setCommand( LEFT_LEG_DOWN );
+			_puppet->update();
+		} else {
+//			std::cout << "LEFT_LEG_REST" << std::endl;
+//			_puppet->setCommand( LEFT_LEG_CLEAR );
+		}
+
+
+		/////// RIGHT SIDE
+		// LEFT SIDE
+				XnSkeletonJointPosition rightHand;
+				ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_RIGHT_HAND, rightHand);
+
+				XnSkeletonJointPosition rightElbow;
+				ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_RIGHT_ELBOW, rightElbow);
+
+				XnSkeletonJointPosition rightShoulder;
+				ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_RIGHT_SHOULDER, rightShoulder);
+
+
+		deltaY = rightHand.position.Y - rightElbow.position.Y;
+		range = 100.0;
+		if(deltaY > range) {
+//			std::cout << "RIGHT_ARM_UP" << std::endl;
+			_puppet->setCommand( RIGHT_ARM_UP );
+			_puppet->update();
+		} else if ( deltaY < -range) {
+//			std::cout << "RIGHT_ARM_DOWN" << std::endl;
+			_puppet->setCommand( RIGHT_ARM_DOWN );
+			_puppet->update();
+		} else {
+//			std::cout << "RIGHT_ARM_REST" << std::endl;
+		//			_puppet->setCommand( RIGHT_ARM_CLEAR );
+		}
+
+		deltaY = rightElbow.position.Y - rightShoulder.position.Y;
+		if(deltaY > range) {
+//			std::cout << "RIGHT_LEG_UP" << std::endl;
+			_puppet->setCommand( RIGHT_LEG_UP );
+			_puppet->update();
+		} else if ( deltaY < -range ) {
+//			std::cout << "RIGHT_LEG_DOWN" << std::endl;
+			_puppet->setCommand( RIGHT_LEG_DOWN );
+			_puppet->update();
+		} else {
+//			std::cout << "RIGHT_LEG_REST" << std::endl;
+		//			_puppet->setCommand( RIGHT_LEG_CLEAR );
+		}
+
+//		std::cout << "AB" << rightShoulder.position.Y <<  " :" << rightElbow.position.Y << std::endl;
+		_puppet->update();
+	}
 }
 
 void PuppetMaster::draw()
@@ -358,8 +465,16 @@ void PuppetMaster::draw()
 void PuppetMaster::render()
 {
 	mDisplayList.draw();
-
+	float center;
 	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
+		XnSkeletonJointPosition trackhead;
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_HIP, trackhead);
+		center = trackhead.position.X;
+	}
+
+	float range = 850;
+	if (ni->mUserGen.GetSkeletonCap().IsTracking(1) && center < range && center > -range) {
+
 		if (!_isTracking) {
 			_isTracking = true;
 			pickupBulletJointFromFloor(RagDoll::BODYPART_HEAD);
@@ -368,21 +483,22 @@ void PuppetMaster::render()
 			pickupBulletJointFromFloor(RagDoll::BODYPART_RIGHT_LOWER_ARM);
 			pickupBulletJointFromFloor(RagDoll::BODYPART_RIGHT_UPPER_LEG);
 		}
-		float yOffset = 1200.0f;
+		float yOffset = 1600.0f;
 		float niToBulletScale = 0.001f;
 		btVector3 genPivot;
 
 		XnSkeletonJointPosition joint;
 		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_HEAD, joint);
-		btVector3 headPivot = btVector3(joint.position.X, joint.position.Y + yOffset, 0) * niToBulletScale;
+		btVector3 headPivot = btVector3(0, joint.position.Y + yOffset, 0) * niToBulletScale;
 		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD]->setPivotB(headPivot);
 		float zOffset = joint.position.Z;
+		float xOffset = joint.position.X;
 
-		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_HAND, RagDoll::BODYPART_LEFT_LOWER_ARM, yOffset, zOffset);
-		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_KNEE, RagDoll::BODYPART_LEFT_UPPER_LEG, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_HAND, RagDoll::BODYPART_LEFT_LOWER_ARM, xOffset, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_KNEE, RagDoll::BODYPART_LEFT_UPPER_LEG, xOffset, yOffset, zOffset);
 
-		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_HAND, RagDoll::BODYPART_RIGHT_LOWER_ARM, yOffset, zOffset);
-		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_KNEE, RagDoll::BODYPART_RIGHT_UPPER_LEG, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_HAND, RagDoll::BODYPART_RIGHT_LOWER_ARM, xOffset, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_KNEE, RagDoll::BODYPART_RIGHT_UPPER_LEG, xOffset, yOffset, zOffset);
 
 	} else {
 		if (_isTracking) {
@@ -426,12 +542,12 @@ void PuppetMaster::drawFloorPlane( float floorSize )
 	glEnd();
 }
 
-void PuppetMaster::transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset)
+void PuppetMaster::transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float xOffset, float yOffset, float zOffset)
 {
 	btVector3 pivot;
 	XnSkeletonJointPosition joint;
 	ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, niJoint, joint);
-	pivot = btVector3(joint.position.X, joint.position.Y + yOffset, joint.position.Z - zOffset) * 0.001f;
+	pivot = btVector3(joint.position.X - xOffset, joint.position.Y + yOffset, joint.position.Z - zOffset) * 0.001f;
 	_ragdollController->ragDoll->m_constraints[bulletJoint]->setPivotB(pivot);
 }
 
