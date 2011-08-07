@@ -8,19 +8,20 @@
 #include "AudioNode.h"
 
 
-AudioNode::AudioNode( XnSkeletonJoint aJointID, std::string aSampleFile ) {
+AudioNode::AudioNode( int aJointID, std::string aSampleFile ) {
 	sampleFile = aSampleFile;
 	jointID = aJointID;
 	client = AudioClient::AudioClient();
-
-	std::cout << sampleFile << std::endl;
-//	client.play("Resources/" + sampleFile );
+	client.play(sampleFile );
 }
 
 void AudioNode::update() {
-//	client.update();
+	client.update();
 }
 
+void AudioNode::reset() {
+	client.reset();
+}
 AudioNode::~AudioNode() {
 	// TODO Auto-generated destructor stub
 }

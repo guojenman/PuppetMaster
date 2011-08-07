@@ -10,18 +10,19 @@
 
 #include <string>
 #include "AudioClient.h"
-#include "XnTypes.h"
+#include "../RagDoll.h"
 
 
 class AudioNode {
 public:
-	AudioNode( XnSkeletonJoint aJointID, std::string sampleFile );
+	AudioNode( int aJointID, std::string sampleFile );
 	virtual ~AudioNode();
 	void update();
+	void reset();
 
 
 
-	XnSkeletonJoint jointID;
+	int jointID;
 	std::string sampleFile;
 	AudioClient client;
 };

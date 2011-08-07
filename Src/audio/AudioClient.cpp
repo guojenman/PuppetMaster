@@ -13,9 +13,9 @@ void AudioClient::update() {
 }
 
 void AudioClient::play(string resource) {
-	player.loadSound(App::getResourcePath(resource));
+	player.loadSound(resource);
 	player.setVolume(0.75f);
-	player.setLoop(true);
+	player.setLoop(false);
 	player.play();
 	speed = 1.f;
 	pan = 0.5f;
