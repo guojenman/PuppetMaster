@@ -76,7 +76,7 @@ void Particle::findVelocity()
 	  
 	if( ALLOWPERLIN ) {
 		vel += perlin;
-		vel.z += perlin.z;
+		vel.z += perlin.z*0.5;
 	}
 
 	if( ALLOWFLOOR ) {
