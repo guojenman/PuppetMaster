@@ -50,10 +50,10 @@ void SerialCommunicationApp::keyDown( KeyEvent event )
 }
 
 void SerialCommunicationApp::mouseDown(MouseEvent event){
-	if(puppet.bSendSerialMessage)
-        puppet.bSendSerialMessage = false;
+	if(puppet.sendSerialMessage)
+        puppet.sendSerialMessage = false;
     else
-        puppet.bSendSerialMessage = true;        
+        puppet.sendSerialMessage = true;        
 }
 
 

@@ -20,9 +20,7 @@ public:
 	void resetCommand();
 	bool isValidCommand(string c);
 	void sendMessage(string message);
-	bool bSendSerialMessage, isDebug;
+	bool sendSerialMessage, isDebug;
     Serial serial;
-    int commandCount;
-    
     string serialCommand;
 };

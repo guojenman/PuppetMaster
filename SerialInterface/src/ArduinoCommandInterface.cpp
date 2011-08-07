@@ -4,8 +4,7 @@
 void ArduinoCommandInterface::setup(string device, bool debug = false)
 {
 	isDebug = debug;
-    commandCount = 0;
-	bSendSerialMessage = true;
+	sendSerialMessage = true;
 	if(isDebug) printDevices();	
 	bindDevice(device);
 }
@@ -50,28 +49,19 @@ void ArduinoCommandInterface::setCommand(string c)
 
 void ArduinoCommandInterface::resetCommand()
 {
-	if(serialCommand == "1" || serialCommand == "2")
-		serialCommand = "3";
-	if(serialCommand == "4" || serialCommand == "5")
-		serialCommand = "6";
-	if(serialCommand == "q" || serialCommand == "w")
-		serialCommand = "e";
-	if(serialCommand == "r" || serialCommand == "t")
-		serialCommand = "y";
+
+	if(serialCommand == "1" || serialCommand == "2") serialCommand = "3";
+	if(serialCommand == "4" || serialCommand == "5") serialCommand = "6";
+	if(serialCommand == "q" || serialCommand == "w") serialCommand = "e";
+	if(serialCommand == "r" || serialCommand == "t") serialCommand = "y";
 }
 
 bool ArduinoCommandInterface::isValidCommand(string c)
 {
-	if(c == "1" || c == "2" || c == "3" || c == "4" || c == "5" || c == "6" || c == "q" || c == "w" || c =="e" || c =="r" || c == "t" || c == "y")
-		return true;
-	else
-		return false;
+	return (c == "1" || c == "2" || c == "3" || c == "4" || c == "5" || c == "6" || c == "q" || c == "w" || c =="e" || c =="r" || c == "t" || c == "y");
 }
 
 void ArduinoCommandInterface::update()
 {	
-	if (bSendSerialMessage && isValidCommand(serialCommand))
-	{
-        sendMessage(serialCommand);
-	}
+	if (sendSerialMessage && isValidCommand(serialCommand)) sendMessage(serialCommand);
 }
