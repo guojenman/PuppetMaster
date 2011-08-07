@@ -76,7 +76,7 @@ void Particle::findVelocity()
 	  
 	if( ALLOWPERLIN ) {
 		vel += perlin;
-//		vel.z += perlin.z;
+		vel.z += perlin.z;
 	}
 
 	if( ALLOWFLOOR ) {
@@ -84,7 +84,7 @@ void Particle::findVelocity()
 		float posy = loc[0].y + vel.y;
 
 		if( loc[0].y + vel.y < floorLevel ){
-			std::cout << posy <<  floorLevel << " " << counter << std::endl;
+//			std::cout << posy <<  floorLevel << " " << counter << std::endl;
 			ISBOUNCING = true;
 		}
 		else {
