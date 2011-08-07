@@ -361,7 +361,7 @@ void WuCinderNITE::renderColor(ci::Area area)
 	}
 }
 
-void WuCinderNITE::renderSkeleton(ci::Area area)
+void WuCinderNITE::renderSkeleton(float scale)
 {
 	for (int nUser = 0; nUser < mNumUsers; nUser++) {
 		if (mUserGen.GetSkeletonCap().IsTracking(mUsers[nUser])) {
@@ -372,40 +372,41 @@ void WuCinderNITE::renderSkeleton(ci::Area area)
 								  1-mNITEUserColors[mUsers[nUser]%mNITENumNITEUserColors][2], 1);
 
 			// HEAD TO NECK
-			renderLimb(mUsers[nUser], XN_SKEL_HEAD, XN_SKEL_NECK);
+			renderLimb(mUsers[nUser], XN_SKEL_HEAD, XN_SKEL_NECK, scale);
 
 			// Left Arm
-			renderLimb(mUsers[nUser], XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND);
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HAND, XN_SKEL_LEFT_FINGERTIP);
+			renderLimb(mUsers[nUser], XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HAND, XN_SKEL_LEFT_FINGERTIP, scale);
 
 			// RIGHT ARM
-			renderLimb(mUsers[nUser], XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_HAND, XN_SKEL_RIGHT_FINGERTIP);
+			renderLimb(mUsers[nUser], XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_HAND, XN_SKEL_RIGHT_FINGERTIP, scale);
 			// TORSO
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO, scale);
 
 			// LEFT LEG
-			renderLimb(mUsers[nUser], XN_SKEL_TORSO, XN_SKEL_LEFT_HIP);
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE);
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT);
+			renderLimb(mUsers[nUser], XN_SKEL_TORSO, XN_SKEL_LEFT_HIP, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT, scale);
 
 			// RIGHT LEG
-			renderLimb(mUsers[nUser], XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE);
-			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
+			renderLimb(mUsers[nUser], XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE, scale);
+			renderLimb(mUsers[nUser], XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT, scale);
 			// PELVIS
-			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
+			renderLimb(mUsers[nUser], XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP, scale);
+			glLineWidth(1);
 		}
 		ci::gl::color(1, 1, 1, 1);
 	}
 }
 
-void WuCinderNITE::renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence)
+void WuCinderNITE::renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence, float scale)
 {
 	if (!mUserGen.GetSkeletonCap().IsCalibrated(player)) {
 		ci::app::console() << player << ":not calibrated!" << endl;
@@ -424,15 +425,15 @@ void WuCinderNITE::renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkelet
 	}
 	if (true) {
 		// 3D - arbitrary scale
-		ci::gl::drawLine(ci::Vec3f(joint1.position.X, joint1.position.Y, joint1.position.Z),
-				ci::Vec3f(joint2.position.X, joint2.position.Y, joint2.position.Z));
+		ci::gl::drawLine(ci::Vec3f(joint1.position.X, joint1.position.Y, joint1.position.Z) * scale,
+				ci::Vec3f(joint2.position.X, joint2.position.Y, joint2.position.Z) * scale);
 	} else {
 		// 2D
 		XnPoint3D pt[2];
 		pt[0] = joint1.position;
 		pt[1] = joint2.position;
 		mDepthGen.ConvertRealWorldToProjective(2, pt, pt);
-		ci::gl::drawLine(ci::Vec2f(pt[0].X, pt[0].Y), ci::Vec2f(pt[1].X, pt[1].Y));
+		ci::gl::drawLine(ci::Vec2f(pt[0].X, pt[0].Y) * scale, ci::Vec2f(pt[1].X, pt[1].Y) * scale);
 	}
 }
 

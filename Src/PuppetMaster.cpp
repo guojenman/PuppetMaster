@@ -14,6 +14,7 @@
 #include "GLDebugDrawer.h"
 #include "WuCinderNITE.h"
 #include <btBulletDynamicsCommon.h>
+#include "BulletDynamics/ConstraintSolver/btHingeConstraint.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -65,39 +66,27 @@ void PuppetMaster::setup()
 	mapMode.nFPS = 30;
 	mapMode.nXRes = 640;
 	mapMode.nYRes = 480;
-
+	_stepPhysics = false;
 	_ragdollController = new RagDollController();
 	_ragdollController->initPhysics();
 #if DEBUG_DRAW_BULLET
 	_bulletDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	_ragdollController->m_dynamicsWorld->setDebugDrawer(&_bulletDebugDraw);
+	_stepPhysics = true;
 #endif
-	_stepPhysics = false;
 
-//	ni = WuCinderNITE::getInstance();
-//	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
-//	ni->startUpdating();
+
+	ni = WuCinderNITE::getInstance();
+	ni->setup("Resources/SkeletonRec.oni");
+	ni->startUpdating();
 
 }
 
 void PuppetMaster::setupCamera()
 {
 	// Camera perspective properties
-	float cameraFOV			= 60.0f;
-	float cameraNear		= 1.0f;
-	float cameraFar			= 1000000.0;
-
-	ci::Vec3f p = ci::Vec3f::one() * 2000.0f;// Start off this far away from the center
-	ci::CameraPersp cam = ci::CameraPersp( getWindowWidth(), getWindowHeight(), cameraFOV );
-
-	cam.setWorldUp( ci::Vec3f(0, 1, 0) );
-	cam.setEyePoint( ci::Vec3f(0, 0, -5.0f ) );
-	cam.setCenterOfInterestPoint( ci::Vec3f::zero() );
-	cam.setPerspective( cameraFOV, getWindowAspectRatio(), cameraNear, cameraFar );
-	cam.setViewDirection( ci::Vec3f(0, 0, 1 ) );
-
 	// Set mayacamera
-	_mayaCam.setCurrentCam( cam );
+	//_mayaCam.setCurrentCam( cam );
 }
 
 
@@ -106,17 +95,61 @@ void PuppetMaster::update()
 	if(_stepPhysics) {
 		_ragdollController->clientMoveAndDisplay( 16.0 );
 	}
+	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, ni->maxDepth);
+	mCam.lookAt(ci::Vec3f(0, 2, -5.0f), ci::Vec3f(0, 0, 3));
+//	btHingeConstraint* hinge = _ragdollController->ragDoll->m_joints[RagDoll::BODYPART_HEAD];
+
+//	btPoint2PointConstraint* constraint = _ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD];
+//	btVector3 pivot = constraint->getPivotInB();
+//	pivot.setY(pivot.getY() + 0.005);
+//	constraint->setPivotB(pivot);
 }
 
 void PuppetMaster::draw()
 {
 	gl::clear(ColorA(0, 0, 0, 0), true);
-	gl::pushMatrices();
-	gl::setMatrices( _mayaCam.getCamera() );
 
+	gl::pushMatrices();
+	gl::setMatrices( mCam );
+
+	gl::pushModelView();
+	ni->renderSkeleton(0.001f);
+	gl::popModelView();
+
+
+	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
+
+		btVector3 genPivot;
+
+		XnSkeletonJointPosition joint;
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_HEAD, joint);
+		btVector3 headPivot = btVector3(joint.position.X, joint.position.Y + 10.0f, joint.position.Z) * .001f;
+		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD]->setPivotB(headPivot);
+
+		gl::pushModelView();
+		gl::drawCube(Vec3f(headPivot.getX(), headPivot.getY(), headPivot.getZ()), Vec3f(0.5f, 0.5f, 0.5f));
+		gl::popModelView();
+
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_HAND, joint);
+		genPivot = btVector3(joint.position.X, joint.position.Y + 5.0f, joint.position.Z) * .001f;
+		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_LEFT_LOWER_ARM]->setPivotB(genPivot);
+
+		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_RIGHT_HAND, joint);
+		genPivot = btVector3(joint.position.X, joint.position.Y + 5.0f, joint.position.Z) * .001f;
+		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_RIGHT_LOWER_ARM]->setPivotB(genPivot);
+
+
+
+//		btTransform trans;
+//		trans.setIdentity();
+//		_ragdollController->ragDoll->m_bodies[RagDoll::BODYPART_HEAD]->getMotionState()->getWorldTransform(trans);
+//		_ragdollController->ragDoll->m_bodies[RagDoll::BODYPART_HEAD]->translate(headPivot - trans.getOrigin());
+	}
 
 #if DEBUG_DRAW_BULLET
+	gl::pushModelView();
 	_ragdollController->m_dynamicsWorld->debugDrawWorld();
+	gl::popModelView();
 	gl::popMatrices();
 	return;
 #endif
@@ -153,7 +186,7 @@ void PuppetMaster::draw()
 void PuppetMaster::shutdown()
 {
 	console() << "quitting..." << std::endl;
-	//	ni->shutdown();
+	ni->shutdown();
 }
 
 void PuppetMaster::mouseDown( ci::app::MouseEvent event )

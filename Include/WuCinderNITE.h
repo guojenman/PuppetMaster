@@ -46,8 +46,8 @@ public:
 	XnMapOutputMode getMapMode();
 
 	void renderDepthMap(ci::Area area);
-	void renderSkeleton(ci::Area area);
-	void renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence = 0.5f);
+	void renderSkeleton(float scale = 1.0f);
+	void renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence = 0.5f, float scale = 1.0f);
 	void renderColor(ci::Area area);
 	void debugNodeTypes();
 

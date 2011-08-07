@@ -73,7 +73,7 @@ void RagDollController::initPhysics()
 	}
 
 	// Spawn one ragdoll
-	btVector3 startOffset(1,0.5,0);
+	btVector3 startOffset(0,0.5,0);
 	spawnRagdoll(startOffset);
 //	startOffset.setValue(-1,0.5,0);
 //	spawnRagdoll(startOffset);
