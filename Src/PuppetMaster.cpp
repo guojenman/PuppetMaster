@@ -20,7 +20,7 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-#define DEBUG_DRAW_BULLET 1
+#define DEBUG_DRAW_BULLET 0
 
 class PuppetMaster : public AppBasic {
 public:
@@ -34,6 +34,7 @@ public:
 	void		mouseUp( ci::app::MouseEvent event );
 	void 		transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset);
 	void		dropBulletJointToFloor(int bulletJoint);
+	void		drawFloorPlane( float floorSize );
 
 	void update();
 	void draw();
@@ -46,9 +47,6 @@ public:
 	ci::MayaCamUI		_mayaCam;
 	Vec2f				_mousePosition;
 	bool 				_mouseIsDown;
-
-	bool				_stepPhysics;
-
 
 	CameraPersp mCam;
 	RagDollController *_ragdollController;
@@ -68,13 +66,11 @@ void PuppetMaster::setup()
 	mapMode.nFPS = 30;
 	mapMode.nXRes = 640;
 	mapMode.nYRes = 480;
-	_stepPhysics = false;
 	_ragdollController = new RagDollController();
 	_ragdollController->initPhysics();
 #if DEBUG_DRAW_BULLET
 	_bulletDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	_ragdollController->m_dynamicsWorld->setDebugDrawer(&_bulletDebugDraw);
-	_stepPhysics = true;
 #endif
 
 
@@ -94,9 +90,7 @@ void PuppetMaster::setupCamera()
 
 void PuppetMaster::update()
 {
-	if(_stepPhysics) {
-		_ragdollController->clientMoveAndDisplay( 16.0 );
-	}
+	_ragdollController->clientMoveAndDisplay( 16.0 );
 	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, ni->maxDepth);
 	mCam.lookAt(ci::Vec3f(0, 2, -3.0f), ci::Vec3f(0, 2, 3));
 //	btHingeConstraint* hinge = _ragdollController->ragDoll->m_joints[RagDoll::BODYPART_HEAD];
@@ -127,60 +121,60 @@ void PuppetMaster::draw()
 		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD]->setPivotB(headPivot);
 		float zOffset = joint.position.Z;
 
-//		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_ELBOW, RagDoll::BODYPART_LEFT_UPPER_ARM, yOffset, zOffset);
 		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_HAND, RagDoll::BODYPART_LEFT_LOWER_ARM, yOffset, zOffset);
 		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_KNEE, RagDoll::BODYPART_LEFT_UPPER_LEG, yOffset, zOffset);
 
-//		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_ELBOW, RagDoll::BODYPART_RIGHT_UPPER_ARM, yOffset, zOffset);
 		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_HAND, RagDoll::BODYPART_RIGHT_LOWER_ARM, yOffset, zOffset);
 		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_KNEE, RagDoll::BODYPART_RIGHT_UPPER_LEG, yOffset, zOffset);
 
 	} else {
 		dropBulletJointToFloor(RagDoll::BODYPART_HEAD);
-//		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_UPPER_ARM);
 		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_LOWER_ARM);
 		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_UPPER_LEG);
-//		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_UPPER_ARM);
 		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_LOWER_ARM);
 		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_UPPER_LEG);
 
 	}
 
-#if DEBUG_DRAW_BULLET
 	gl::pushModelView();
 	_ragdollController->m_dynamicsWorld->debugDrawWorld();
 	gl::popModelView();
-	gl::popMatrices();
-	return;
-#endif
+
 	// Draw each rigid body in the doll
 	for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
 	{
+		btScalar m[16];
 		btRigidBody* body = _ragdollController->ragDoll->m_bodies[i];
 
-		btTransform trans;
-		body->getMotionState()->getWorldTransform( trans );
-
-		float mSize = 0.1;
-		ci::Vec3f pos = ci::Vec3f( trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ() );
-		ci::Quatf rotation = ci::Quatf( trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ(), trans.getRotation().getW() );
+		btDefaultMotionState* myMotionState = (btDefaultMotionState*)body->getMotionState();
+		myMotionState->m_graphicsWorldTrans.getOpenGLMatrix(m);
 
 		btCapsuleShape* shape = dynamic_cast<btCapsuleShape*> (_ragdollController->ragDoll->m_shapes[i]);
+		float height = (shape->getHalfHeight()*2) + 2*shape->getMargin();
 
-		//new btCapsuleShape(btScalar(0.15), btScalar(0.20));
-//		new btCapsuleShape(btScalar(0.15), btScalar(0.20));
-
-		float r = shape->getRadius();
-		float h = shape->getHalfHeight();
-
-		//ci::Vec3f* m_sizes[BODYPART_COUNT]
-		ci::gl::pushModelView();
-			ci::gl::translate( pos );
-			ci::gl::rotate( rotation );
-			ci::gl::drawCube( ci::Vec3f::zero(), ci::Vec3f(shape->getRadius(), shape->getHalfHeight(), shape->getRadius()) * 2 );
-		ci::gl::popModelView();
+		gl::pushModelView();
+			glMultMatrixf(m);
+			gl::drawCube( Vec3f::zero(), Vec3f(shape->getRadius(), height, shape->getRadius()));
+		gl::popModelView();
 	}
+
+//	gl::pushModelView();
+//	drawFloorPlane(10);
+//	gl::popModelView();
+
 	gl::popMatrices();
+
+}
+
+void PuppetMaster::drawFloorPlane( float floorSize )
+{
+	// Draw floor plane
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f,1.0f); glVertex3f(-floorSize, 0.0f, floorSize);
+		glTexCoord2f(1.0f,1.0f); glVertex3f( floorSize, 0.0f, floorSize);
+		glTexCoord2f(1.0f,0.0f); glVertex3f( floorSize, 0.0f,-floorSize);
+		glTexCoord2f(0.0f,0.0f); glVertex3f(-floorSize, 0.0f,-floorSize);
+	glEnd();
 }
 
 void PuppetMaster::transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset)
@@ -233,9 +227,6 @@ void PuppetMaster::mouseUp( ci::app::MouseEvent event )
 
 void PuppetMaster::keyDown(KeyEvent event)
 {
-	if (event.getChar() == KeyEvent::KEY_s) {
-		_stepPhysics = true;
-	}
 }
 
 void PuppetMaster::keyUp(KeyEvent event)
@@ -243,7 +234,6 @@ void PuppetMaster::keyUp(KeyEvent event)
 	switch(event.getChar()) {
 		case KeyEvent::KEY_q: quit(); break;
 		case KeyEvent::KEY_f: setFullScreen(!isFullScreen()); break;
-		case KeyEvent::KEY_s: _stepPhysics = false; break;
 	}
 }
 
