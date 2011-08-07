@@ -215,9 +215,9 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 		m_constraints[BODYPART_LEFT_LOWER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_LOWER_ARM]);
 //		m_constraints[BODYPART_LEFT_UPPER_ARM] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_UPPER_ARM]);
 //		m_constraints[BODYPART_RIGHT_LOWER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_LOWER_LEG]);
-//		m_constraints[BODYPART_RIGHT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_UPPER_LEG]);
+		m_constraints[BODYPART_RIGHT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_RIGHT_UPPER_LEG]);
 //		m_constraints[BODYPART_LEFT_LOWER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_LOWER_LEG]);
-//		m_constraints[BODYPART_LEFT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_UPPER_LEG]);
+		m_constraints[BODYPART_LEFT_UPPER_LEG] = createPoint2PointConstraint(m_bodies[BODYPART_LEFT_UPPER_LEG]);
 		m_constraints[BODYPART_HEAD] = createPoint2PointConstraint(m_bodies[BODYPART_HEAD]);
 //		m_constraints[BODYPART_SPINE] = createPoint2PointConstraint(m_bodies[BODYPART_SPINE]);
 //		m_constraints[BODYPART_PELVIS] = createPoint2PointConstraint(m_bodies[BODYPART_PELVIS]);
