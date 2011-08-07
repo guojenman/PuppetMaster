@@ -14,6 +14,7 @@
 #include "GLDebugDrawer.h"
 #include "WuCinderNITE.h"
 #include "audio/AudioNode.h"
+#include "particle/ParticleController.h"
 
 #include <btBulletDynamicsCommon.h>
 #include "BulletDynamics/ConstraintSolver/btHingeConstraint.h"
@@ -30,6 +31,7 @@ public:
 	void setup();
 	void setupCamera();
 	void setupAudioNodes();
+	void setupParticleController();
 
 
 	void		mouseDown( ci::app::MouseEvent event );
@@ -41,9 +43,11 @@ public:
 	void		drawFloorPlane( float floorSize );
 
 	void update();
-		void updateAudioNodes();
-		void draw();
-		void shutdown();
+	void updateJoints();
+	void updateAudioNodes();
+	void updateParticleController();
+	void draw();
+	void shutdown();
 
 	void keyDown(KeyEvent event);
 	void keyUp(KeyEvent event);
@@ -53,10 +57,14 @@ public:
 	Vec2f				_mousePosition;
 	bool 				_mouseIsDown;
 
+	// AudioNodes
 	float scanlinePosition;
-		float scanLineSpeed;
-		float lastScanlinePosition;
-		std::vector<AudioNode*> _audioNodes;
+	float scanLineSpeed;
+	float lastScanlinePosition;
+	std::vector<AudioNode*> _audioNodes;
+
+	// ParticleController
+	ParticleController* _particleController;
 
 	CameraPersp mCam;
 	RagDollController *_ragdollController;
@@ -87,6 +95,7 @@ void PuppetMaster::setup()
 	ni->startUpdating();
 
 	setupAudioNodes();
+	setupParticleController();
 
 }
 
@@ -101,7 +110,6 @@ void PuppetMaster::setupCamera()
 void PuppetMaster::setupAudioNodes() {
 	std::string base_path = getAppPath() + "/Contents/Resources/";
 
-
 	scanlinePosition = 0;
 	lastScanlinePosition = 0;
 	scanLineSpeed = 0.025;
@@ -114,13 +122,25 @@ void PuppetMaster::setupAudioNodes() {
 	_audioNodes.push_back(new AudioNode(RagDoll::BODYPART_HEAD, base_path + "piano_G_sharp.mp3"));
 }
 
+void PuppetMaster::setupParticleController() {
+	_particleController = new ParticleController();
+
+	// Create N emitters
+	size_t len = _audioNodes.size();
+	for (int i = 0; i < len; ++i) {
+		_particleController->createEmitterWithJointID( _audioNodes[i]->jointID );
+	}
+}
+
 
 void PuppetMaster::update()
 {
 	_ragdollController->clientMoveAndDisplay( 16.0 );
+	updateAudioNodes();
+	updateJoints();
+
 	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, ni->maxDepth);
 	mCam.lookAt(ci::Vec3f(0, 2, -3.0f), ci::Vec3f(0, 2, 3));
-		updateAudioNodes();
 
 //	btHingeConstraint* hinge = _ragdollController->ragDoll->m_joints[RagDoll::BODYPART_HEAD];
 
@@ -131,38 +151,8 @@ void PuppetMaster::update()
 }
 
 
-void PuppetMaster::updateAudioNodes() {
-	scanlinePosition += scanLineSpeed;
-	if(scanlinePosition > 4)
-		scanlinePosition = 0;
-
-	size_t len = _audioNodes.size();
-	for (int i = 0; i < len; ++i) {
-		btTransform trans;
-		_ragdollController->ragDoll->m_bodies[_audioNodes[i]->jointID]->getMotionState()->getWorldTransform(trans);
-
-
-		float y = trans.getOrigin().getY();
-
-		if( y < scanlinePosition && y > lastScanlinePosition )
-			_audioNodes[i]->reset();
-
-		_audioNodes[i]->update();
-	}
-
-	lastScanlinePosition = scanlinePosition;
-}
-
-void PuppetMaster::draw()
-{
-	gl::clear(ColorA(0, 0, 0, 0), true);
-
-	gl::pushMatrices();
-	gl::setMatrices( mCam );
-
-
+void PuppetMaster::updateJoints() {
 	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
-
 		float yOffset = 2000.0f;
 		float niToBulletScale = 0.001f;
 		btVector3 genPivot;
@@ -187,6 +177,47 @@ void PuppetMaster::draw()
 		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_UPPER_LEG);
 
 	}
+}
+void PuppetMaster::updateAudioNodes() {
+
+	if (!ni->mUserGen.GetSkeletonCap().IsTracking(1))
+		return;
+
+	scanlinePosition += scanLineSpeed;
+	if(scanlinePosition > 4)
+		scanlinePosition = 0;
+
+	// Play tone if between last and current scanline position
+	size_t len = _audioNodes.size();
+	for (int i = 0; i < len; ++i) {
+		btTransform trans;
+		_ragdollController->ragDoll->m_bodies[_audioNodes[i]->jointID]->getMotionState()->getWorldTransform(trans);
+
+
+		float y = trans.getOrigin().getY();
+		if( y < scanlinePosition && y > lastScanlinePosition )
+			_audioNodes[i]->reset();
+
+		_audioNodes[i]->update();
+	}
+
+	lastScanlinePosition = scanlinePosition;
+}
+
+
+void PuppetMaster::updateParticleController() {
+	_particleController->update( _ragdollController->ragDoll );
+}
+
+void PuppetMaster::draw()
+{
+	gl::clear(ColorA(0, 0, 0, 0), true);
+
+	gl::pushMatrices();
+	gl::setMatrices( mCam );
+
+
+
 
 	gl::pushModelView();
 	_ragdollController->m_dynamicsWorld->debugDrawWorld();
@@ -215,7 +246,10 @@ void PuppetMaster::draw()
 //	gl::popModelView();
 
 	ci::gl::drawLine(ci::Vec3f(-1000.0f, scanlinePosition, 0), ci::Vec3f(1000.0f, scanlinePosition, 0));
+
 	gl::popMatrices();
+
+	_particleController->draw();
 
 }
 
