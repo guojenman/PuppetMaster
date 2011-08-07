@@ -16,8 +16,8 @@ multiple emitters.
 class Emitter {
  public:
 	Emitter( int aJointID );
-	void exist( ci::Vec2i mouseLoc );
-	void setVelToMouse( ci::Vec2i mouseLoc );
+	void exist( ci::Vec3f location );
+	void setVelToMouse( ci::Vec3f location );
 	void findVelocity();
 	void setPosition();
 	void iterateListExist();

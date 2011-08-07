@@ -24,7 +24,9 @@ using namespace ci::app;
 using namespace std;
 
 #define DEBUG_DRAW_BULLET 0
-#define DEBUG_USE_NITE 0
+#define DEBUG_USE_NITE 1
+
+extern int counter;
 
 class PuppetMaster : public AppBasic {
 public:
@@ -214,7 +216,7 @@ void PuppetMaster::updateAudioNodes() {
 		float y = trans.getOrigin().getY();
 		if( y < scanlinePosition && y > lastScanlinePosition ) {
 			Emitter* emitter = _particleController->getEmitterWithJointID( _audioNodes[i]->jointID );
-			if(emitter) emitter->addParticles( 100 );
+			if(emitter) emitter->addParticles( ci::Rand::randInt( 1, 5) );
 			_audioNodes[i]->reset();
 		}
 
@@ -233,7 +235,7 @@ void PuppetMaster::updateParticleController() {
 
 void PuppetMaster::draw()
 {
-
+	counter++;
 	gl::clear(ColorA(0, 0, 0, 0), true);
 
 	gl::pushMatrices();
@@ -268,8 +270,7 @@ void PuppetMaster::draw()
 ////	drawFloorPlane(10);
 ////	gl::popModelView();
 //
-//	ci::gl::drawLine(ci::Vec3f(-1000.0f, scanlinePosition, 0), ci::Vec3f(1000.0f, scanlinePosition, 0));
-
+	ci::gl::drawLine(ci::Vec3f(-1000.0f, scanlinePosition, 0), ci::Vec3f(1000.0f, scanlinePosition, 0));
 	_particleController->update( _ragdollController->ragDoll );
 	_particleController->draw();
 
@@ -343,6 +344,7 @@ void PuppetMaster::mouseUp( ci::app::MouseEvent event )
 
 void PuppetMaster::keyDown(KeyEvent event)
 {
+	_particleController->keyDown( event );
 }
 
 void PuppetMaster::keyUp(KeyEvent event)

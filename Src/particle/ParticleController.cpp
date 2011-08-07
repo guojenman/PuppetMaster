@@ -16,19 +16,23 @@ using namespace ci::app;
 
 // global variables
 int			counter = 0;
-float		floorLevel = 400.0f;
+float		floorLevel = 1000.0f;
 ci::gl::Texture *particleImg, *emitterImg;
 bool		ALLOWFLOOR = false;
 bool		ALLOWGRAVITY = false;
 bool		ALLOWPERLIN = false;
 bool		ALLOWTRAILS = false;
-ci::Vec3f		gravity( 0, 0.35f, 0 );
+ci::Vec3f		gravity( 0, -0.15f, 0 );
 const int	CINDER_FACTOR = 1; // how many times more particles than the Java version
 
 ParticleController::ParticleController() {
 	std::string base_path = ci::app::App::get()->getAppPath() + "/Contents/Resources/";
 
 	ALLOWPERLIN = true;
+	ALLOWGRAVITY = true;
+	ALLOWFLOOR = true;
+//ALLOWTRAILS = true;
+
 
 	//ci::gl::Texture( loadImage( loadResource( RES_PARTICLE ) ) );
 	particleImg = new gl::Texture( ci::loadImage( loadResource( RES_PARTICLE ) ) );
@@ -51,7 +55,7 @@ void ParticleController::keyDown( ci::app::KeyEvent event )
 		ALLOWPERLIN = ! ALLOWPERLIN;
 	else if( ( key == 't' ) || ( key == 'T' ) )
 		ALLOWTRAILS = ! ALLOWTRAILS;
-	else if( ( key == 'f' ) || ( key == 'F' ) )
+	else if( ( key == 'l' ) || ( key == 'L' ) )
 		ALLOWFLOOR = ! ALLOWFLOOR;
 }
 
@@ -59,13 +63,13 @@ void ParticleController::keyDown( ci::app::KeyEvent event )
 
 void ParticleController::update( RagDoll* aRagDoll )
 {
-	counter++;
+
 
 //	glClearColor( 0, 0, 0, 0 );
 //			glClear( GL_COLOR_BUFFER_BIT );
 	//
 	//		// to accommodate resizable screen, we'll recalculate where the floor should be every frame just in case it's changed
-			floorLevel = 2 / 3.0f * getWindowHeight();
+//			floorLevel = 2 / 3.0f * getWindowHeight();
 	//
 	//		// Turns on additive blending so we can draw a bunch of glowing images without
 	//		// needing to do any depth testing.
@@ -84,7 +88,7 @@ void ParticleController::update( RagDoll* aRagDoll )
 	for(std::vector<Emitter*>::iterator it= _emitters.begin(); it!= _emitters.end(); ++it ) {
 		btTransform trans;
 		aRagDoll->m_bodies[ (*it)->jointID ]->getMotionState()->getWorldTransform(trans);
-		(*it)->exist( ci::Vec2i( trans.getOrigin().getX()*1000, trans.getOrigin().getY()*1000 ) );
+		(*it)->exist( ci::Vec3f( trans.getOrigin().getX()*1000, trans.getOrigin().getY()*1000, trans.getOrigin().getZ()*1000 ) );
 	}
 
 	gl::color( 1.0, 1.0, 1.0, 1.0 );
@@ -114,6 +118,7 @@ void ParticleController::draw()
 //
 //		// to accommodate resizable screen, we'll recalculate where the floor should be every frame just in case it's changed
 //		floorLevel = 2 / 3.0f * getWindowHeight();
+//		floorLevel = -1000;
 //
 //		// Turns on additive blending so we can draw a bunch of glowing images without
 //		// needing to do any depth testing.

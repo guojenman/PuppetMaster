@@ -41,7 +41,6 @@ Particle::Particle( Vec3f _loc, Vec3f _vel )
 	// This randomizes the original sent velocity so the particles
 	// dont all move at the same speed in the same direction.
 	vel = _vel * 0.5f + Rand::randVec3f() * Rand::randFloat( 10.0f );
-	vel *= 0.2;
 
 	perlin = Vec3f::zero();
 
@@ -56,7 +55,7 @@ Particle::Particle( Vec3f _loc, Vec3f _vel )
 void Particle::exist()
 {
 	if( ALLOWPERLIN )
-			findPerlin();
+		findPerlin();
 
 		findVelocity();
 		setPosition();
@@ -67,7 +66,7 @@ void Particle::exist()
 void Particle::findPerlin()
 {
 	Vec3f noise = sPerlin.dfBm( loc[0] * 0.01f + Vec3f( 0, 0, counter / 100.0f ) );
-	perlin = noise.normalized() * 0.75f;
+	perlin = noise.normalized() * 0.5f;
 }
 
 void Particle::findVelocity()
@@ -75,11 +74,17 @@ void Particle::findVelocity()
 	if( ALLOWGRAVITY )
 		vel += gravity;
 	  
-	if( ALLOWPERLIN )
+	if( ALLOWPERLIN ) {
 		vel += perlin;
+//		vel.z += perlin.z;
+	}
 
 	if( ALLOWFLOOR ) {
-		if( loc[0].y + vel.y > floorLevel ){
+
+		float posy = loc[0].y + vel.y;
+
+		if( loc[0].y + vel.y < floorLevel ){
+			std::cout << posy <<  floorLevel << " " << counter << std::endl;
 			ISBOUNCING = true;
 		}
 		else {
@@ -109,12 +114,14 @@ void Particle::setPosition()
 void Particle::render()
 {
 	// As the particle ages, it will gain blue but will lose red and green.
-	Color c = Color( agePer, agePer * 0.75f, 1.0f - agePer );
+	Color c = Color( agePer, agePer * 0.75f, 1.0f - agePer);
 	renderImage( loc[0], radius * agePer, c, 1.0f );
 }
 
 void Particle::renderTrails()
 {
+	glPushMatrix();
+//		glTranslatef( _loc.x, _loc.y, _loc.z );
 	glBegin( GL_QUAD_STRIP );
 
 	for( int i = 0; i < len - 2; i++ ) {
@@ -143,6 +150,7 @@ void Particle::renderTrails()
 			  perp1 = perp0.cross( perp2 ).normalized();
 			  
 		Vec3f off = perp1 * ( radius * agePer * per * 0.1f );
+		off.y += 2.0;
 
 		glColor4f( per, per * 0.25f, 1.0f - per, per * 0.5f );
 		glVertex3fv( loc[i] - off );
@@ -150,6 +158,7 @@ void Particle::renderTrails()
 	}
 
 	glEnd();
+		glPopMatrix();
 }
 
 void Particle::setAge()

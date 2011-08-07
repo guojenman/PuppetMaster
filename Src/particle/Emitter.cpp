@@ -20,12 +20,12 @@ Emitter::Emitter( int aJointID )
 	vel = Vec3f::zero();
 }
 
-void Emitter::exist( Vec2i mouseLoc )
+void Emitter::exist( Vec3f location )
 {
 	if( shouldDraw > 0)
 		shouldDraw--;
 
-	setVelToMouse( mouseLoc );
+	setVelToMouse( location );
 	findVelocity();
 	setPosition();
 	iterateListExist();
@@ -36,9 +36,9 @@ void Emitter::exist( Vec2i mouseLoc )
 		iterateListRenderTrails();
 }
 
-void Emitter::setVelToMouse( Vec2i mouseLoc )
+void Emitter::setVelToMouse( Vec3f location )
 {
-	velToMouse.set( mouseLoc.x - loc.x, mouseLoc.y - loc.y, 0 );
+	velToMouse.set( location.x - loc.x, location.y - loc.y, location.z - loc.z );
 }
 
 void Emitter::findVelocity()
@@ -51,7 +51,7 @@ void Emitter::setPosition()
 	loc += vel;
 
 	if( ALLOWFLOOR ) {
-		if( loc.y > floorLevel ) {
+		if( loc.y < floorLevel ) {
 			loc.y = floorLevel;
 			vel.y = 0;
 		}
