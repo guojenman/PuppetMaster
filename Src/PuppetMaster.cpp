@@ -32,6 +32,8 @@ public:
 	void		mouseMove( ci::app::MouseEvent event );
 	void		mouseDrag( ci::app::MouseEvent event );
 	void		mouseUp( ci::app::MouseEvent event );
+	void 		transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset);
+	void		dropBulletJointToFloor(int bulletJoint);
 
 	void update();
 	void draw();
@@ -96,7 +98,7 @@ void PuppetMaster::update()
 		_ragdollController->clientMoveAndDisplay( 16.0 );
 	}
 	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, ni->maxDepth);
-	mCam.lookAt(ci::Vec3f(0, 2, -5.0f), ci::Vec3f(0, 0, 3));
+	mCam.lookAt(ci::Vec3f(0, 2, -3.0f), ci::Vec3f(0, 2, 3));
 //	btHingeConstraint* hinge = _ragdollController->ragDoll->m_joints[RagDoll::BODYPART_HEAD];
 
 //	btPoint2PointConstraint* constraint = _ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD];
@@ -112,38 +114,36 @@ void PuppetMaster::draw()
 	gl::pushMatrices();
 	gl::setMatrices( mCam );
 
-	gl::pushModelView();
-	ni->renderSkeleton(0.001f);
-	gl::popModelView();
-
 
 	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
 
+		float yOffset = 2000.0f;
+		float niToBulletScale = 0.001f;
 		btVector3 genPivot;
 
 		XnSkeletonJointPosition joint;
 		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_HEAD, joint);
-		btVector3 headPivot = btVector3(joint.position.X, joint.position.Y + 10.0f, joint.position.Z) * .001f;
+		btVector3 headPivot = btVector3(joint.position.X, joint.position.Y + yOffset, 0) * niToBulletScale;
 		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_HEAD]->setPivotB(headPivot);
+		float zOffset = joint.position.Z;
 
-		gl::pushModelView();
-		gl::drawCube(Vec3f(headPivot.getX(), headPivot.getY(), headPivot.getZ()), Vec3f(0.5f, 0.5f, 0.5f));
-		gl::popModelView();
+//		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_ELBOW, RagDoll::BODYPART_LEFT_UPPER_ARM, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_HAND, RagDoll::BODYPART_LEFT_LOWER_ARM, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_LEFT_KNEE, RagDoll::BODYPART_LEFT_UPPER_LEG, yOffset, zOffset);
 
-		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_LEFT_HAND, joint);
-		genPivot = btVector3(joint.position.X, joint.position.Y + 5.0f, joint.position.Z) * .001f;
-		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_LEFT_LOWER_ARM]->setPivotB(genPivot);
+//		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_ELBOW, RagDoll::BODYPART_RIGHT_UPPER_ARM, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_HAND, RagDoll::BODYPART_RIGHT_LOWER_ARM, yOffset, zOffset);
+		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_KNEE, RagDoll::BODYPART_RIGHT_UPPER_LEG, yOffset, zOffset);
 
-		ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, XN_SKEL_RIGHT_HAND, joint);
-		genPivot = btVector3(joint.position.X, joint.position.Y + 5.0f, joint.position.Z) * .001f;
-		_ragdollController->ragDoll->m_constraints[RagDoll::BODYPART_RIGHT_LOWER_ARM]->setPivotB(genPivot);
+	} else {
+		dropBulletJointToFloor(RagDoll::BODYPART_HEAD);
+//		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_UPPER_ARM);
+		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_LOWER_ARM);
+		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_UPPER_LEG);
+//		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_UPPER_ARM);
+		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_LOWER_ARM);
+		dropBulletJointToFloor(RagDoll::BODYPART_RIGHT_UPPER_LEG);
 
-
-
-//		btTransform trans;
-//		trans.setIdentity();
-//		_ragdollController->ragDoll->m_bodies[RagDoll::BODYPART_HEAD]->getMotionState()->getWorldTransform(trans);
-//		_ragdollController->ragDoll->m_bodies[RagDoll::BODYPART_HEAD]->translate(headPivot - trans.getOrigin());
 	}
 
 #if DEBUG_DRAW_BULLET
@@ -181,6 +181,24 @@ void PuppetMaster::draw()
 		ci::gl::popModelView();
 	}
 	gl::popMatrices();
+}
+
+void PuppetMaster::transformBulletJointsWithNIJoint(XnSkeletonJoint niJoint, int bulletJoint, float yOffset, float zOffset)
+{
+	btVector3 pivot;
+	XnSkeletonJointPosition joint;
+
+	ni->mUserGen.GetSkeletonCap().GetSkeletonJointPosition(1, niJoint, joint);
+	pivot = btVector3(joint.position.X, joint.position.Y + yOffset, joint.position.Z - zOffset) * 0.001f;
+	_ragdollController->ragDoll->m_constraints[bulletJoint]->setPivotB(pivot);
+}
+
+void PuppetMaster::dropBulletJointToFloor(int bulletJoint)
+{
+	float floor = 3.5f;
+	btVector3 pivot = _ragdollController->ragDoll->m_constraints[bulletJoint]->getPivotInB();
+	pivot.setY((floor - pivot.getY()) * .5);
+	_ragdollController->ragDoll->m_constraints[bulletJoint]->setPivotB(pivot);
 }
 
 void PuppetMaster::shutdown()
@@ -222,11 +240,10 @@ void PuppetMaster::keyDown(KeyEvent event)
 
 void PuppetMaster::keyUp(KeyEvent event)
 {
-	if (event.getChar() == KeyEvent::KEY_q) {
-		quit();
-	}
-	if (event.getChar() == KeyEvent::KEY_s) {
-		_stepPhysics = false;
+	switch(event.getChar()) {
+		case KeyEvent::KEY_q: quit(); break;
+		case KeyEvent::KEY_f: setFullScreen(!isFullScreen()); break;
+		case KeyEvent::KEY_s: _stepPhysics = false; break;
 	}
 }
 
