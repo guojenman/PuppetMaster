@@ -54,4 +54,4 @@ void TemplateApp::draw()
 }
 
 
-CINDER_APP_BASIC( TemplateApp, RendererGl )
+//CINDER_APP_BASIC( TemplateApp, RendererGl )

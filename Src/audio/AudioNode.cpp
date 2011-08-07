@@ -7,9 +7,18 @@
 
 #include "AudioNode.h"
 
-AudioNode::AudioNode() {
-	// TODO Auto-generated constructor stub
 
+AudioNode::AudioNode( XnSkeletonJoint aJointID, std::string aSampleFile ) {
+	sampleFile = aSampleFile;
+	jointID = aJointID;
+	client = AudioClient::AudioClient();
+
+	std::cout << sampleFile << std::endl;
+//	client.play("Resources/" + sampleFile );
+}
+
+void AudioNode::update() {
+//	client.update();
 }
 
 AudioNode::~AudioNode() {
