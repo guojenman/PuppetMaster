@@ -24,13 +24,13 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 		: m_ownerWorld (ownerWorld)
 	{
 		// Setup the geometry
-		m_shapes[BODYPART_PELVIS] = new btCapsuleShape(btScalar(0.15), btScalar(0.20));
+		m_shapes[BODYPART_PELVIS] = new btCapsuleShape(btScalar(0.13), btScalar(0.20));
 		m_shapes[BODYPART_SPINE] = new btCapsuleShape(btScalar(0.15), btScalar(0.28));
-		m_shapes[BODYPART_HEAD] = new btCapsuleShape(btScalar(0.10), btScalar(0.05));
+		m_shapes[BODYPART_HEAD] = new btCapsuleShape(btScalar(0.10), btScalar(0.19));
 		m_shapes[BODYPART_LEFT_UPPER_LEG] = new btCapsuleShape(btScalar(0.07), btScalar(0.45));
-		m_shapes[BODYPART_LEFT_LOWER_LEG] = new btCapsuleShape(btScalar(0.05), btScalar(0.37));
+		m_shapes[BODYPART_LEFT_LOWER_LEG] = new btCapsuleShape(btScalar(0.05), btScalar(0.41));
 		m_shapes[BODYPART_RIGHT_UPPER_LEG] = new btCapsuleShape(btScalar(0.07), btScalar(0.45));
-		m_shapes[BODYPART_RIGHT_LOWER_LEG] = new btCapsuleShape(btScalar(0.05), btScalar(0.37));
+		m_shapes[BODYPART_RIGHT_LOWER_LEG] = new btCapsuleShape(btScalar(0.05), btScalar(0.41));
 		m_shapes[BODYPART_LEFT_UPPER_ARM] = new btCapsuleShape(btScalar(0.05), btScalar(0.33));
 		m_shapes[BODYPART_LEFT_LOWER_ARM] = new btCapsuleShape(btScalar(0.04), btScalar(0.25));
 		m_shapes[BODYPART_RIGHT_UPPER_ARM] = new btCapsuleShape(btScalar(0.05), btScalar(0.33));
@@ -116,7 +116,7 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 
 		localA.setIdentity(); localB.setIdentity();
 		localA.getBasis().setEulerZYX(0,0,M_PI_2); localA.setOrigin(btVector3(btScalar(0.), btScalar(0.30), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,M_PI_2); localB.setOrigin(btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0,0,M_PI_2); localB.setOrigin(btVector3(btScalar(0.), btScalar(-0.1), btScalar(0.)));
 		coneC = new btConeTwistConstraint(*m_bodies[BODYPART_SPINE], *m_bodies[BODYPART_HEAD], localA, localB);
 		coneC->setLimit(M_PI_4, M_PI_4, M_PI_2);
 		m_joints[JOINT_SPINE_HEAD] = coneC;
@@ -137,7 +137,7 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 
 		localA.setIdentity(); localB.setIdentity();
 		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(btVector3(btScalar(0.), btScalar(0.235), btScalar(0.)));
 		hingeC =  new btHingeConstraint(*m_bodies[BODYPART_LEFT_UPPER_LEG], *m_bodies[BODYPART_LEFT_LOWER_LEG], localA, localB);
 		hingeC->setLimit(btScalar(0), btScalar(M_PI_2));
 		m_joints[JOINT_LEFT_KNEE] = hingeC;
@@ -158,7 +158,7 @@ RagDoll::RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset)
 
 		localA.setIdentity(); localB.setIdentity();
 		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(btVector3(btScalar(0.), btScalar(0.235), btScalar(0.)));
 		hingeC =  new btHingeConstraint(*m_bodies[BODYPART_RIGHT_UPPER_LEG], *m_bodies[BODYPART_RIGHT_LOWER_LEG], localA, localB);
 		hingeC->setLimit(btScalar(0), btScalar(M_PI_2));
 		m_joints[JOINT_RIGHT_KNEE] = hingeC;
@@ -244,12 +244,10 @@ btRigidBody* RagDoll::localCreateRigidBody (btScalar mass, const btTransform& st
 
 btPoint2PointConstraint* RagDoll::createPoint2PointConstraint(btRigidBody* body)
 {
-	body->setActivationState(DISABLE_DEACTIVATION);
 	btVector3 pivot = body->getCenterOfMassTransform().inverse() * body->getCenterOfMassTransform().getOrigin();
 	btPoint2PointConstraint* constraint = new btPoint2PointConstraint(*body, pivot);
 	constraint->m_setting.m_impulseClamp = 30.0f; // clapping
 	constraint->m_setting.m_tau = 0.001f;
-	m_ownerWorld->addConstraint(constraint);
 	return constraint;
 }
 
