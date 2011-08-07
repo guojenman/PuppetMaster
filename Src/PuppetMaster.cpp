@@ -24,6 +24,7 @@ using namespace ci::app;
 using namespace std;
 
 #define DEBUG_DRAW_BULLET 0
+#define DEBUG_USE_NITE 0
 
 class PuppetMaster : public AppBasic {
 public:
@@ -90,9 +91,11 @@ void PuppetMaster::setup()
 #endif
 
 
+#if DEBUG_USE_NITE
 	ni = WuCinderNITE::getInstance();
 	ni->setup("Resources/SkeletonRec.oni");
 	ni->startUpdating();
+#endif
 
 	setupAudioNodes();
 	setupParticleController();
@@ -139,7 +142,13 @@ void PuppetMaster::update()
 	updateAudioNodes();
 	updateJoints();
 
+
+
+#if DEBUG_USE_NITE
 	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, ni->maxDepth);
+#else
+	mCam.setPerspective( 60, getWindowAspectRatio(), 0.1f, 100000);
+#endif
 	mCam.lookAt(ci::Vec3f(0, 2, -3.0f), ci::Vec3f(0, 2, 3));
 
 //	btHingeConstraint* hinge = _ragdollController->ragDoll->m_joints[RagDoll::BODYPART_HEAD];
@@ -152,6 +161,8 @@ void PuppetMaster::update()
 
 
 void PuppetMaster::updateJoints() {
+
+#if DEBUG_USE_NITE
 	if (ni->mUserGen.GetSkeletonCap().IsTracking(1)) {
 		float yOffset = 2000.0f;
 		float niToBulletScale = 0.001f;
@@ -169,7 +180,9 @@ void PuppetMaster::updateJoints() {
 		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_HAND, RagDoll::BODYPART_RIGHT_LOWER_ARM, yOffset, zOffset);
 		transformBulletJointsWithNIJoint(XN_SKEL_RIGHT_KNEE, RagDoll::BODYPART_RIGHT_UPPER_LEG, yOffset, zOffset);
 
-	} else {
+	} else
+#endif
+	{
 		dropBulletJointToFloor(RagDoll::BODYPART_HEAD);
 		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_LOWER_ARM);
 		dropBulletJointToFloor(RagDoll::BODYPART_LEFT_UPPER_LEG);
@@ -178,10 +191,13 @@ void PuppetMaster::updateJoints() {
 
 	}
 }
+
 void PuppetMaster::updateAudioNodes() {
 
+#if DEBUG_USE_NITE
 	if (!ni->mUserGen.GetSkeletonCap().IsTracking(1))
 		return;
+#endif
 
 	scanlinePosition += scanLineSpeed;
 	if(scanlinePosition > 4)
@@ -194,9 +210,15 @@ void PuppetMaster::updateAudioNodes() {
 		_ragdollController->ragDoll->m_bodies[_audioNodes[i]->jointID]->getMotionState()->getWorldTransform(trans);
 
 
+		// If it falls within range, emit some particles and play a tone
 		float y = trans.getOrigin().getY();
-		if( y < scanlinePosition && y > lastScanlinePosition )
+		if( y < scanlinePosition && y > lastScanlinePosition ) {
+			Emitter* emitter = _particleController->getEmitterWithJointID( _audioNodes[i]->jointID );
+			if(emitter) emitter->addParticles( 10 );
 			_audioNodes[i]->reset();
+		}
+
+
 
 		_audioNodes[i]->update();
 	}
@@ -206,24 +228,25 @@ void PuppetMaster::updateAudioNodes() {
 
 
 void PuppetMaster::updateParticleController() {
-	_particleController->update( _ragdollController->ragDoll );
+//	_particleController->update( _ragdollController->ragDoll );
 }
 
 void PuppetMaster::draw()
 {
+
 	gl::clear(ColorA(0, 0, 0, 0), true);
 
 	gl::pushMatrices();
 	gl::setMatrices( mCam );
 
-
-
-
+//
+//
+//
 	gl::pushModelView();
 	_ragdollController->m_dynamicsWorld->debugDrawWorld();
 	gl::popModelView();
-
-	// Draw each rigid body in the doll
+////
+//	// Draw each rigid body in the doll
 	for (int i = 0; i < RagDoll::BODYPART_COUNT; ++i)
 	{
 		btScalar m[16];
@@ -240,16 +263,22 @@ void PuppetMaster::draw()
 			gl::drawCube( Vec3f::zero(), Vec3f(shape->getRadius(), height, shape->getRadius()));
 		gl::popModelView();
 	}
+//
+////	gl::pushModelView();
+////	drawFloorPlane(10);
+////	gl::popModelView();
+//
+//	ci::gl::drawLine(ci::Vec3f(-1000.0f, scanlinePosition, 0), ci::Vec3f(1000.0f, scanlinePosition, 0));
 
-//	gl::pushModelView();
-//	drawFloorPlane(10);
-//	gl::popModelView();
+	_particleController->update( _ragdollController->ragDoll );
+	_particleController->draw();
 
-	ci::gl::drawLine(ci::Vec3f(-1000.0f, scanlinePosition, 0), ci::Vec3f(1000.0f, scanlinePosition, 0));
+
 
 	gl::popMatrices();
 
-	_particleController->draw();
+//	_particleController->update( _ragdollController->ragDoll );
+//	_particleController->draw();
 
 }
 

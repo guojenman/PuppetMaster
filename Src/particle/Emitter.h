@@ -26,6 +26,7 @@ class Emitter {
 	void iterateListRenderTrails();
 	void addParticles( int _amt );
 
+	int shouldDraw;
 	int	jointID;
 	ci::Vec3f loc;
 	ci::Vec3f vel;

@@ -8,6 +8,7 @@
 #include "ParticleController.h"
 #include "cinder/app/App.h"
 #include "cinder/ImageIo.h"
+#include "cinder/Rand.h"
 #include "Resources.h"
 using namespace ci;
 using namespace ci::app;
@@ -27,6 +28,7 @@ const int	CINDER_FACTOR = 1; // how many times more particles than the Java vers
 ParticleController::ParticleController() {
 	std::string base_path = ci::app::App::get()->getAppPath() + "/Contents/Resources/";
 
+	ALLOWPERLIN = true;
 
 	//ci::gl::Texture( loadImage( loadResource( RES_PARTICLE ) ) );
 	particleImg = new gl::Texture( ci::loadImage( loadResource( RES_PARTICLE ) ) );
@@ -59,13 +61,32 @@ void ParticleController::update( RagDoll* aRagDoll )
 {
 	counter++;
 
+//	glClearColor( 0, 0, 0, 0 );
+//			glClear( GL_COLOR_BUFFER_BIT );
+	//
+	//		// to accommodate resizable screen, we'll recalculate where the floor should be every frame just in case it's changed
+			floorLevel = 2 / 3.0f * getWindowHeight();
+	//
+	//		// Turns on additive blending so we can draw a bunch of glowing images without
+	//		// needing to do any depth testing.
+			glDepthMask( GL_FALSE );
+			glDisable( GL_DEPTH_TEST );
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+
+	//
+	//		for(std::vector<Emitter*>::iterator it= _emitters.begin(); it!= _emitters.end(); ++it ) {
+	//			(*it)->exist( ci::Vec2i(300, 100) );
+	//		}
+
 
 	// For each emitter, get the position of the limb at that location in the ragdoll
 	for(std::vector<Emitter*>::iterator it= _emitters.begin(); it!= _emitters.end(); ++it ) {
 		btTransform trans;
 		aRagDoll->m_bodies[ (*it)->jointID ]->getMotionState()->getWorldTransform(trans);
-		(*it)->exist( ci::Vec2i( trans.getOrigin().getX(), trans.getOrigin().getY() ) );
-		(*it)->addParticles( 2 );
+		(*it)->exist( ci::Vec2i( trans.getOrigin().getX()*1000, trans.getOrigin().getY()*1000 ) );
+//		(*it)->exist( ci::Vec2i( ci::Rand::randFloat(1000), -200 ) );
+//		(*it)->addParticles( 2 );
 	}
 }
 
@@ -86,30 +107,24 @@ Emitter* ParticleController::getEmitterWithJointID( int aJointID ) {
 
 void ParticleController::draw()
 {
+//
 //	glClearColor( 0, 0, 0, 0 );
-//	glClear( GL_COLOR_BUFFER_BIT );
-
-	// to accommodate resizable screen, we'll recalculate where the floor should be every frame just in case it's changed
-	floorLevel = 2 / 3.0f * getWindowHeight();
-
-	// Turns on additive blending so we can draw a bunch of glowing images without
-	// needing to do any depth testing.
-	glDepthMask( GL_FALSE );
-	glDisable( GL_DEPTH_TEST );
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-
-
-	for(std::vector<Emitter*>::iterator it= _emitters.begin(); it!= _emitters.end(); ++it ) {
-		//
-		(*it)->draw();
-
-//		(*it)->exist( ci::Vec2i(300, 300) );
-	}
-
-	ci::gl::enableDepthRead();
-	ci::gl::enableDepthWrite();
-	ci::gl::disableAlphaBlending();
+//		glClear( GL_COLOR_BUFFER_BIT );
+//
+//		// to accommodate resizable screen, we'll recalculate where the floor should be every frame just in case it's changed
+//		floorLevel = 2 / 3.0f * getWindowHeight();
+//
+//		// Turns on additive blending so we can draw a bunch of glowing images without
+//		// needing to do any depth testing.
+//		glDepthMask( GL_FALSE );
+//		glDisable( GL_DEPTH_TEST );
+//		glEnable( GL_BLEND );
+//		glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+//
+//
+//		for(std::vector<Emitter*>::iterator it= _emitters.begin(); it!= _emitters.end(); ++it ) {
+//			(*it)->exist( ci::Vec2i(300, 100) );
+//		}
 }
 
 // It would be faster to just make QUADS calls directly to the loc
@@ -118,6 +133,9 @@ void ParticleController::draw()
 // up later on.
 void renderImage( Vec3f _loc, float _diam, Color _col, float _alpha )
 {
+	_loc *= 0.001f;
+//	_loc.y += 2;
+	_diam *= 0.01;
 	glPushMatrix();
 	glTranslatef( _loc.x, _loc.y, _loc.z );
 	glScalef( _diam, _diam, _diam );

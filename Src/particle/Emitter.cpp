@@ -14,6 +14,7 @@ extern gl::Texture *particleImg, *emitterImg;
 Emitter::Emitter( int aJointID )
 {
 	jointID = aJointID;
+	shouldDraw = 0;
 	myColor = Color( 1, 1, 1 );
 	loc = Vec3f::zero();
 	vel = Vec3f::zero();
@@ -21,15 +22,14 @@ Emitter::Emitter( int aJointID )
 
 void Emitter::exist( Vec2i mouseLoc )
 {
+	if( shouldDraw > 0)
+		shouldDraw--;
+
 	setVelToMouse( mouseLoc );
 	findVelocity();
 	setPosition();
 	iterateListExist();
-}
-
-void Emitter::draw()  {
 	render();
-
 
 	glDisable( GL_TEXTURE_2D );
 	if( ALLOWTRAILS )
@@ -60,28 +60,28 @@ void Emitter::setPosition()
 
 void Emitter::iterateListExist()
 {
-	glEnable( GL_TEXTURE_2D );
-	particleImg->bind();
 
-	for( list<Particle>::iterator it = particles.begin(); it != particles.end(); ) {
-		if( ! it->ISDEAD ) {
-			it->exist();
-			++it;
+	glEnable( GL_TEXTURE_2D );
+		particleImg->bind();
+
+		for( list<Particle>::iterator it = particles.begin(); it != particles.end(); ) {
+			if( ! it->ISDEAD ) {
+				it->exist();
+				++it;
+			}
+			else {
+				it = particles.erase( it );
+			}
 		}
-		else {
-			it = particles.erase( it );
-		}
-	}
+
 }
 
 void Emitter::render()
 {
-	emitterImg->bind();
-	renderImage( loc, 150, myColor, 1.0 );
+	if(shouldDraw <= 0 ) return;
 
-	for( list<Particle>::iterator it = particles.begin(); it != particles.end(); ++it ) {
-		it->render();
-	}
+	emitterImg->bind();
+	renderImage( loc, 150*0.1, myColor, 1.0 );
 }
 
 void Emitter::iterateListRenderTrails()
@@ -93,6 +93,7 @@ void Emitter::iterateListRenderTrails()
 
 void Emitter::addParticles( int _amt )
 {
+	shouldDraw += 5;
 	for( int i = 0; i < _amt; i++ ) {
 		particles.push_back( Particle( loc, vel ) );
 	}

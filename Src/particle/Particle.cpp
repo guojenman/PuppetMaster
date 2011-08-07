@@ -41,6 +41,7 @@ Particle::Particle( Vec3f _loc, Vec3f _vel )
 	// This randomizes the original sent velocity so the particles
 	// dont all move at the same speed in the same direction.
 	vel = _vel * 0.5f + Rand::randVec3f() * Rand::randFloat( 10.0f );
+	vel *= 0.1;
 
 	perlin = Vec3f::zero();
 
@@ -55,12 +56,12 @@ Particle::Particle( Vec3f _loc, Vec3f _vel )
 void Particle::exist()
 {
 	if( ALLOWPERLIN )
-		findPerlin();
-	  
-	findVelocity();
-	setPosition();
+			findPerlin();
 
-	setAge();
+		findVelocity();
+		setPosition();
+		render();
+		setAge();
 }
 
 void Particle::findPerlin()
