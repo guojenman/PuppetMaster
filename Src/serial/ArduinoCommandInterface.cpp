@@ -15,10 +15,12 @@ void ArduinoCommandInterface::bindDevice(string device)
     try {
 		Serial::Device dev = Serial::findDeviceByNameContains(device);
 		serial = Serial( dev, 19200);
+		isInitialized = true;
 	}
 	catch( ... ) {
 		console() << "There was an error initializing the serial device!" << std::endl;
-		exit( -1 );
+		isInitialized = false;
+//			exit( -1 );
 	}
 }
 
@@ -33,6 +35,8 @@ void ArduinoCommandInterface::printDevices()
 
 void ArduinoCommandInterface::sendMessage(string message)
 {
+	if( !isInitialized ) return;
+
     unsigned char m_Test[20];    
     std::strcpy( (char*) m_Test, message.c_str() );
     serial.writeByte(m_Test[0]);
