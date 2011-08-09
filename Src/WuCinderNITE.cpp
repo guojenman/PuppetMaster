@@ -199,10 +199,9 @@ void WuCinderNITE::stopUpdating()
 		return;
 	}
 	mRunUpdates = false;
-	mContext.StopGeneratingAll();
 
 	mThread->join();
-	assert(mThread);
+	mContext.StopGeneratingAll();
 }
 
 void WuCinderNITE::update()
@@ -237,8 +236,6 @@ void WuCinderNITE::update()
 			mImageGen.GetMetaData(mImageMeta);
 			updateImageSurface();
 		}
-
-
 	}
 }
 

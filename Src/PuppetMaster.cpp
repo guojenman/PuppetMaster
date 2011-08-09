@@ -46,7 +46,7 @@ using namespace ciDeferred;
 
 static const int SHADOW_MAP_RESOLUTION = 1024;
 
-
+#define DISABLE_ARDUINO 1
 #define DEBUG_DRAW_BULLET 0
 #define APP_WIDTH 800
 #define APP_HEIGHT 600
@@ -134,8 +134,8 @@ void PuppetMaster::setup()
 	mapMode.nXRes = 640;
 	mapMode.nYRes = 480;
 	ni = WuCinderNITE::getInstance();
-	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
-//	ni->setup("Resources/SkeletonRec.oni");
+//	ni->setup("Resources/Sample-User.xml", mapMode, true, true);
+	ni->setup("Resources/SkeletonRec.oni");
 	ni->startUpdating();
 
 	_ragdollController = new RagDollController();
@@ -207,7 +207,9 @@ void PuppetMaster::setup()
 
 	setupAudioNodes();
 	setupParticleController();
+#ifndef DISABLE_ARDUINO
 	setupSerialCommunication();
+#endif
 }
 
 
@@ -254,7 +256,9 @@ void PuppetMaster::update()
 	setupCamera();
 	_ragdollController->clientMoveAndDisplay( 16.0 );
 	updateAudioNodes();
+#ifndef DISABLE_ARDUINO
 	updateSerialCommunication();
+#endif
 }
 
 
@@ -576,6 +580,9 @@ void PuppetMaster::shutdown()
 	}
 	delete mLight0;
 	ni->shutdown();
+#ifndef DISABLE_ARDUINO
+	delete _puppet;
+#endif
 }
 
 void PuppetMaster::resize(ResizeEvent event)
