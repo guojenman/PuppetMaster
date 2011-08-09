@@ -16,7 +16,7 @@ Perlin sPerlin( 2 );
 
 Particle::Particle( Vec3f _loc, Vec3f _vel )
 {
-	radius      = Rand::randFloat( 10, 40 );
+	radius      = Rand::randFloat( 5, 20 );
 	len         = (int)radius;
 
 	// This confusing-looking line does three things at once.
@@ -76,7 +76,7 @@ void Particle::findVelocity()
 	  
 	if( ALLOWPERLIN ) {
 		vel += perlin;
-		vel.z += perlin.z*0.5;
+//		vel.z += perlin.z*4;
 	}
 
 	if( ALLOWFLOOR ) {
@@ -114,7 +114,7 @@ void Particle::setPosition()
 void Particle::render()
 {
 	// As the particle ages, it will gain blue but will lose red and green.
-	Color c = Color( agePer, agePer * 0.75f, 1.0f - agePer);
+	Color c = Color( agePer*0.5, agePer * 0.75f, (1.0f - agePer) * 0.5);
 	renderImage( loc[0], radius * agePer, c, 1.0f );
 }
 
