@@ -38,6 +38,8 @@ public:
 	bool isValidCommand(string c);
 	void sendMessage(string message);
 	bool sendSerialMessage, isDebug;
+
+	bool isInitialized;
     Serial serial;
     string serialCommand;
 };

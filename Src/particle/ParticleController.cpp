@@ -131,7 +131,7 @@ void ParticleController::draw()
 void renderImage( Vec3f _loc, float _diam, Color _col, float _alpha )
 {
 	_loc *= 0.001f;
-	_diam *= 0.03;
+	_diam *= 0.1;
 	glPushMatrix();
 	glTranslatef( _loc.x, _loc.y, _loc.z );
 	glScalef( _diam, _diam, _diam );
