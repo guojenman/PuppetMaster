@@ -39,6 +39,7 @@ WuCinderNITE* WuCinderNITE::getInstance()
 }
 
 WuCinderNITE::WuCinderNITE() {
+	useSingleCalibrationMode = true;
 	mNeedPoseForCalibration = false;
 	mIsCalibrated = false;
 	mRunUpdates = false;
@@ -524,10 +525,12 @@ void XN_CALLBACK_TYPE WuCinderNITE::CB_CalibrationComplete(xn::SkeletonCapabilit
 	ci::app::console() << "calibration completed for user " << nId << (eStatus == XN_CALIBRATION_STATUS_OK ? " success" : " failed") << endl;
 	if (eStatus == XN_CALIBRATION_STATUS_OK) {
 		if (!mInstance->mIsCalibrated) {
-			mInstance->mUserGen.GetSkeletonCap().SaveCalibrationData(nId, 0);
+			if (mInstance->useSingleCalibrationMode) {
+				mInstance->mIsCalibrated = TRUE;
+				mInstance->mUserGen.GetSkeletonCap().SaveCalibrationData(nId, 0);
+			}
 			mInstance->mUserGen.GetSkeletonCap().StartTracking(nId);
 			mInstance->mUserGen.GetSkeletonCap().SetSmoothing(0.5f);
-			mInstance->mIsCalibrated = TRUE;
 		}
 		mInstance->mUserGen.GetPoseDetectionCap().StopPoseDetection(nId);
 		mInstance->findUsers();

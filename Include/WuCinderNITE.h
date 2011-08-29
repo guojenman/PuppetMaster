@@ -57,6 +57,7 @@ public:
 	WuCinderNITESingal	signalNewUser;
 	WuCinderNITESingal	signalLostUser;
 
+	bool				useSingleCalibrationMode;
 	unsigned short		maxDepth;
 	XnMapOutputMode		mMapMode;
 	xn::Context			mContext;
