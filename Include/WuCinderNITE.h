@@ -15,6 +15,7 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 
 #include <XnOpenNI.h>
 #include <XnCppWrapper.h>
@@ -32,6 +33,8 @@ if (status != XN_STATUS_OK) \
 
 class WuCinderNITE {
 public:
+	typedef boost::signals2::signal<void (XnUserID)> WuCinderNITESingal;
+
 	static WuCinderNITE* getInstance();
 	virtual ~WuCinderNITE();
 
@@ -46,11 +49,15 @@ public:
 	XnMapOutputMode getMapMode();
 
 	void renderDepthMap(ci::Area area);
-	void renderSkeleton(float scale = 1.0f);
-	void renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence = 0.5f, float scale = 1.0f);
+	void renderSkeleton();
+	void renderLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2, float confidence = 0.75f);
 	void renderColor(ci::Area area);
 	void debugNodeTypes();
 
+	WuCinderNITESingal	signalNewUser;
+	WuCinderNITESingal	signalLostUser;
+
+	bool				useSingleCalibrationMode;
 	unsigned short		maxDepth;
 	XnMapOutputMode		mMapMode;
 	xn::Context			mContext;
@@ -75,13 +82,10 @@ protected:
 	void registerCallbacks();
 	void unregisterCallbacks();
 	void findUsers();
-	void assignPlayer(XnUserID nId);
 
 	static WuCinderNITE* mInstance;
-	/**
-	 * Flag for update loop (exits when false)
-	 */
-	volatile bool		mRunUpdates;
+
+	volatile bool		mRunUpdates; // exits update thread if false
 	boost::shared_ptr<boost::thread>	mThread;
 
 	bool				mNeedPoseForCalibration;
@@ -94,10 +98,12 @@ protected:
 	float 				mDepthHistogram[MAX_DEPTH];
 
 	XnChar				mCalibrationPose[20];
-	XnCallbackHandle	hUserCBs, hCalibrationCompleteCBs, hPoseCBs;
+	XnCallbackHandle	hUserCBs, hCalibrationPhasesCBs, hCalibrationCompleteCBs, hPoseCBs;
 
 	void static XN_CALLBACK_TYPE CB_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie);
 	void static XN_CALLBACK_TYPE CB_LostUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie);
+	void static XN_CALLBACK_TYPE CB_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie);
+	void static XN_CALLBACK_TYPE CB_CalibrationEnd(xn::SkeletonCapability& capability, XnUserID nId, XnBool bSuccess, void* pCookie);
 	void static XN_CALLBACK_TYPE CB_CalibrationComplete(xn::SkeletonCapability& skeleton, XnUserID nId, XnCalibrationStatus eStatus, void* cxt);
 	void static XN_CALLBACK_TYPE CB_PoseDetected(xn::PoseDetectionCapability& capability, const XnChar* strPose, XnUserID nId, void* pCookie);
 
